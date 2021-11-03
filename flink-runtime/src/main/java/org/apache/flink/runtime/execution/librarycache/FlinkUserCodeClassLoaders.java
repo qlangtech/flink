@@ -37,6 +37,7 @@ public class FlinkUserCodeClassLoaders {
 
     private FlinkUserCodeClassLoaders() {}
 
+    // baisui modify for client side classloader extension
     public static URLClassLoader parentFirst(
             URL[] urls,
             ClassLoader parent,
@@ -84,7 +85,7 @@ public class FlinkUserCodeClassLoaders {
         }
     }
 
-    private static URLClassLoader wrapWithSafetyNet(
+    public static URLClassLoader wrapWithSafetyNet(
             FlinkUserCodeClassLoader classLoader, boolean check) {
         return check
                 ? new SafetyNetWrapperClassLoader(classLoader, classLoader.getParent())

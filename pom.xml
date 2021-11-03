@@ -28,7 +28,7 @@ under the License.
 
 	<groupId>org.apache.flink</groupId>
 	<artifactId>flink-parent</artifactId>
-	<version>1.13.1</version>
+	<version>tis-1.13.1</version>
 
 	<name>Flink : </name>
 	<packaging>pom</packaging>
@@ -58,7 +58,7 @@ under the License.
 		<module>flink-scala</module>
 		<module>flink-filesystems</module>
 		<module>flink-runtime</module>
-		<module>flink-runtime-web</module>
+<!--		<module>flink-runtime-web</module>-->
 		<module>flink-optimizer</module>
 		<module>flink-streaming-java</module>
 		<module>flink-streaming-scala</module>
