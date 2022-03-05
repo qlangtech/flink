@@ -48,14 +48,17 @@ public class FlinkKubeClientFactory {
         return INSTANCE;
     }
 
+    public static Config kubeConfig;
+
     /**
      * Create a Flink Kubernetes client with the given configuration.
      *
      * @param flinkConfig Flink configuration
      * @param useCase Flink Kubernetes client use case (e.g. client, resourcemanager,
-     *     kubernetes-ha-services)
+     *         kubernetes-ha-services)
+     *
      * @return Return the Flink Kubernetes client with the specified configuration and dedicated IO
-     *     executor.
+     *         executor.
      */
     public FlinkKubeClient fromConfiguration(Configuration flinkConfig, String useCase) {
         final Config config;
@@ -67,7 +70,10 @@ public class FlinkKubeClientFactory {
 
         final String kubeConfigFile =
                 flinkConfig.getString(KubernetesConfigOptions.KUBE_CONFIG_FILE);
-        if (kubeConfigFile != null) {
+        // baisui 20211104 modify for config inject form context
+        if (kubeConfig != null) {
+            config = kubeConfig;
+        } else if (kubeConfigFile != null) {
             LOG.debug("Trying to load kubernetes config from file: {}.", kubeConfigFile);
             try {
                 // If kubeContext is null, the default context in the kubeConfigFile will be used.

@@ -40,6 +40,7 @@ import org.apache.flink.runtime.security.SecurityUtils;
 import org.apache.flink.util.FlinkException;
 
 import org.apache.commons.cli.CommandLine;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +90,21 @@ public class KubernetesSessionCli {
         return effectiveConfiguration;
     }
 
-    private int run(String[] args) throws FlinkException, CliArgsException {
+    // baisui add for killCluster
+    public void killCluster(String clusterId) throws FlinkException, CliArgsException {
+        final Configuration configuration = getEffectiveConfiguration(new String[]{});
+
+        final ClusterClientFactory<String> kubernetesClusterClientFactory =
+                clusterClientServiceLoader.getClusterClientFactory(configuration);
+
+        try (final ClusterDescriptor<String> kubernetesClusterDescriptor =
+                     kubernetesClusterClientFactory.createClusterDescriptor(configuration)) {
+            kubernetesClusterDescriptor.killCluster(clusterId);
+        }
+    }
+
+    // baisui modify make it public
+    public String run(String[] args) throws FlinkException, CliArgsException {
         final Configuration configuration = getEffectiveConfiguration(args);
 
         final ClusterClientFactory<String> kubernetesClusterClientFactory =
@@ -139,6 +154,7 @@ public class KubernetesSessionCli {
             } catch (Exception e) {
                 LOG.info("Could not properly shutdown cluster client.", e);
             }
+            return clusterId;
         } finally {
             try {
                 kubernetesClusterDescriptor.close();
@@ -147,13 +163,14 @@ public class KubernetesSessionCli {
             }
         }
 
-        return 0;
+        // return clusterId;
     }
 
     /**
      * Check whether need to continue or kill the cluster.
      *
      * @param in input buffer reader
+     *
      * @return f0, whether need to continue read from input. f1, whether need to kill the cluster.
      */
     private Tuple2<Boolean, Boolean> repStep(BufferedReader in)
@@ -195,7 +212,10 @@ public class KubernetesSessionCli {
 
         try {
             final KubernetesSessionCli cli = new KubernetesSessionCli(configuration, configDir);
-            retCode = SecurityUtils.getInstalledContext().runSecured(() -> cli.run(args));
+            retCode = SecurityUtils.getInstalledContext().runSecured(() -> {
+                cli.run(args);
+                return 0;
+            });
         } catch (CliArgsException e) {
             retCode = AbstractCustomCommandLine.handleCliArgsException(e, LOG);
         } catch (Exception e) {

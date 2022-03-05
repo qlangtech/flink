@@ -90,15 +90,21 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
     }
 
     private Pod decoratePod(Pod pod) {
-        final List<KeyToPath> keyToPaths =
-                getLocalLogConfFiles().stream()
-                        .map(
-                                file ->
-                                        new KeyToPathBuilder()
-                                                .withKey(file.getName())
-                                                .withPath(file.getName())
-                                                .build())
-                        .collect(Collectors.toList());
+
+        // baisui add 2021/11/5 for inject configMap from client
+        final List<KeyToPath> keyToPaths = (configMapData == null)
+                ? getLocalLogConfFiles().stream()
+                .map(file -> new KeyToPathBuilder()
+                        .withKey(file.getName())
+                        .withPath(file.getName())
+                        .build())
+                .collect(Collectors.toList())
+                : configMapData.keySet().stream().map((name) -> new KeyToPathBuilder()
+                .withKey(name)
+                .withPath(name)
+                .build()).collect(Collectors.toList());
+
+
         keyToPaths.add(
                 new KeyToPathBuilder()
                         .withKey(FLINK_CONF_FILENAME)
@@ -122,16 +128,24 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
                 .build();
     }
 
+    // baisui add 2021/11/5 for inject configMap from client
+    public static Map<String, String> configMapData;
+
     @Override
     public List<HasMetadata> buildAccompanyingKubernetesResources() throws IOException {
         final String clusterId = kubernetesComponentConf.getClusterId();
 
         final Map<String, String> data = new HashMap<>();
-
-        final List<File> localLogFiles = getLocalLogConfFiles();
-        for (File file : localLogFiles) {
-            data.put(file.getName(), Files.toString(file, StandardCharsets.UTF_8));
+        // baisui add 2021/11/5 for inject configMap from client
+        if (configMapData != null) {
+            data.putAll(configMapData);
+        } else {
+            final List<File> localLogFiles = getLocalLogConfFiles();
+            for (File file : localLogFiles) {
+                data.put(file.getName(), Files.toString(file, StandardCharsets.UTF_8));
+            }
         }
+
 
         final Map<String, String> propertiesMap =
                 getClusterSidePropertiesMap(kubernetesComponentConf.getFlinkConfiguration());
@@ -162,7 +176,7 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
     @VisibleForTesting
     String getFlinkConfData(Map<String, String> propertiesMap) throws IOException {
         try (StringWriter sw = new StringWriter();
-                PrintWriter out = new PrintWriter(sw)) {
+             PrintWriter out = new PrintWriter(sw)) {
             propertiesMap.forEach(
                     (k, v) -> {
                         out.print(k);
