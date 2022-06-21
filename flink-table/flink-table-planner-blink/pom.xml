@@ -38,6 +38,9 @@ under the License.
 	</description>
 
 	<packaging>jar</packaging>
+	<properties>
+<!--		<maven.test.skip>true</maven.test.skip>-->
+	</properties>
 
 	<dependencies>
 		<!-- Mainly used for calcite-core, it would be relocated

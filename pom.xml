@@ -69,7 +69,7 @@ under the License.
 		<module>flink-container</module>
 		<module>flink-queryable-state</module>
 		<module>flink-tests</module>
-		<module>flink-end-to-end-tests</module>
+<!--		<module>flink-end-to-end-tests</module>-->
 		<module>flink-test-utils-parent</module>
 		<module>flink-state-backends</module>
 		<module>flink-libraries</module>
@@ -80,9 +80,9 @@ under the License.
 		<module>flink-mesos</module>
 		<module>flink-metrics</module>
 		<module>flink-yarn</module>
-		<module>flink-yarn-tests</module>
-		<module>flink-fs-tests</module>
-		<module>flink-docs</module>
+<!--		<module>flink-yarn-tests</module>-->
+<!--		<module>flink-fs-tests</module>-->
+<!--		<module>flink-docs</module>-->
 		<module>flink-python</module>
 		<module>flink-walkthroughs</module>
 		<module>flink-kubernetes</module>
