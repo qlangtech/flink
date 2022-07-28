@@ -2037,6 +2037,8 @@ under the License.
 					<artifactId>scala-maven-plugin</artifactId>
 					<version>3.2.2</version>
 					<configuration>
+						<scalaVersion>${scala.version}</scalaVersion>
+						<recompileMode>all</recompileMode>
 						<args>
 							<arg>-nobootcp</arg>
 							<arg>-target:jvm-${target.java.version}</arg>
