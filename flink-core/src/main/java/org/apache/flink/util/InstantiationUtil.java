@@ -255,7 +255,7 @@ public final class InstantiationUtil {
                 final ObjectStreamClass localClassDescriptor = ObjectStreamClass.lookup(localClass);
                 if (localClassDescriptor != null
                         && localClassDescriptor.getSerialVersionUID()
-                                != streamClassDescriptor.getSerialVersionUID()) {
+                        != streamClassDescriptor.getSerialVersionUID()) {
                     LOG.warn(
                             "Ignoring serialVersionUID mismatch for class {}; was {}, now {}.",
                             streamClassDescriptor.getName(),
@@ -356,7 +356,9 @@ public final class InstantiationUtil {
      * @param targetType type of the instantiated class
      * @param classLoader to use for loading the class
      * @param <T> type of the instantiated class
+     *
      * @return Instance of the given class name
+     *
      * @throws FlinkException if the class could not be found
      */
     public static <T> T instantiate(
@@ -369,7 +371,8 @@ public final class InstantiationUtil {
             throw new FlinkException(
                     String.format(
                             "Could not instantiate class '%s' of type '%s'. Please make sure that this class is on your class path.",
-                            className, targetType.getName()),
+                            className,
+                            targetType.getName()),
                     e);
         }
 
@@ -382,10 +385,12 @@ public final class InstantiationUtil {
      * @param <T> The generic type of the class.
      * @param clazz The class to instantiate.
      * @param castTo Optional parameter, specifying the class that the given class must be a
-     *     subclass off. This argument is added to prevent class cast exceptions occurring later.
+     *         subclass off. This argument is added to prevent class cast exceptions occurring later.
+     *
      * @return An instance of the given class.
+     *
      * @throws RuntimeException Thrown, if the class could not be instantiated. The exception
-     *     contains a detailed message about the reason why the instantiation failed.
+     *         contains a detailed message about the reason why the instantiation failed.
      */
     public static <T> T instantiate(Class<T> clazz, Class<? super T> castTo) {
         if (clazz == null) {
@@ -410,9 +415,11 @@ public final class InstantiationUtil {
      *
      * @param <T> The generic type of the class.
      * @param clazz The class to instantiate.
+     *
      * @return An instance of the given class.
+     *
      * @throws RuntimeException Thrown, if the class could not be instantiated. The exception
-     *     contains a detailed message about the reason why the instantiation failed.
+     *         contains a detailed message about the reason why the instantiation failed.
      */
     public static <T> T instantiate(Class<T> clazz) {
         if (clazz == null) {
@@ -449,6 +456,7 @@ public final class InstantiationUtil {
      * Checks, whether the given class has a public nullary constructor.
      *
      * @param clazz The class to check.
+     *
      * @return True, if the class has a public nullary constructor, false if not.
      */
     public static boolean hasPublicNullaryConstructor(Class<?> clazz) {
@@ -466,6 +474,7 @@ public final class InstantiationUtil {
      * Checks, whether the given class is public.
      *
      * @param clazz The class to check.
+     *
      * @return True, if the class is public, false if not.
      */
     public static boolean isPublic(Class<?> clazz) {
@@ -477,6 +486,7 @@ public final class InstantiationUtil {
      * primitive type.
      *
      * @param clazz The class to check.
+     *
      * @return True, if the class is a proper class, false otherwise.
      */
     public static boolean isProperClass(Class<?> clazz) {
@@ -491,6 +501,7 @@ public final class InstantiationUtil {
      * especially true for anonymous inner classes.
      *
      * @param clazz The class to check.
+     *
      * @return True, if the class is a non-statically accessible inner class.
      */
     public static boolean isNonStaticInnerClass(Class<?> clazz) {
@@ -503,8 +514,9 @@ public final class InstantiationUtil {
      * Class#newInstance()}.
      *
      * @param clazz The class to check.
+     *
      * @throws RuntimeException Thrown, if the class cannot be instantiated by {@code
-     *     Class#newInstance()}.
+     *         Class#newInstance()}.
      */
     public static void checkForInstantiation(Class<?> clazz) {
         final String errorMessage = checkForInstantiationError(clazz);
@@ -533,12 +545,16 @@ public final class InstantiationUtil {
 
     public static <T> T readObjectFromConfig(Configuration config, String key, ClassLoader cl)
             throws IOException, ClassNotFoundException {
-        byte[] bytes = config.getBytes(key, null);
-        if (bytes == null) {
-            return null;
-        }
+        try {
+            byte[] bytes = config.getBytes(key, null);
+            if (bytes == null) {
+                return null;
+            }
 
-        return deserializeObject(bytes, cl);
+            return deserializeObject(bytes, cl);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("key:" + key, e);
+        }
     }
 
     public static void writeObjectToConfig(Object o, Configuration config, String key)
@@ -620,7 +636,7 @@ public final class InstantiationUtil {
 
     public static byte[] serializeObject(Object o) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+             ObjectOutputStream oos = new ObjectOutputStream(baos)) {
             oos.writeObject(o);
             oos.flush();
             return baos.toByteArray();
@@ -650,10 +666,12 @@ public final class InstantiationUtil {
      *
      * @param obj Object to clone
      * @param <T> Type of the object to clone
+     *
      * @return The cloned object
+     *
      * @throws IOException Thrown if the serialization or deserialization process fails.
      * @throws ClassNotFoundException Thrown if any of the classes referenced by the object cannot
-     *     be resolved during deserialization.
+     *         be resolved during deserialization.
      */
     public static <T extends Serializable> T clone(T obj)
             throws IOException, ClassNotFoundException {
@@ -671,10 +689,12 @@ public final class InstantiationUtil {
      * @param obj Object to clone
      * @param classLoader The classloader to resolve the classes during deserialization.
      * @param <T> Type of the object to clone
+     *
      * @return Cloned object
+     *
      * @throws IOException Thrown if the serialization or deserialization process fails.
      * @throws ClassNotFoundException Thrown if any of the classes referenced by the object cannot
-     *     be resolved during deserialization.
+     *         be resolved during deserialization.
      */
     public static <T extends Serializable> T clone(T obj, ClassLoader classLoader)
             throws IOException, ClassNotFoundException {
@@ -691,7 +711,9 @@ public final class InstantiationUtil {
      *
      * @param original Object to clone
      * @param <T> Type of the object to clone
+     *
      * @return Cloned object
+     *
      * @throws IOException Thrown is the serialization fails.
      */
     public static <T extends IOReadableWritable> T createCopyWritable(T original)
@@ -723,8 +745,9 @@ public final class InstantiationUtil {
      *
      * @param in The stream to read the class name from.
      * @param cl The class loader to resolve the class.
+     *
      * @throws IOException Thrown, if the class name could not be read, the class could not be
-     *     found.
+     *         found.
      */
     public static <T> Class<T> resolveClassByName(DataInputView in, ClassLoader cl)
             throws IOException {
@@ -742,8 +765,9 @@ public final class InstantiationUtil {
      * @param in The stream to read the class name from.
      * @param cl The class loader to resolve the class.
      * @param supertype A class that the resolved class must extend.
+     *
      * @throws IOException Thrown, if the class name could not be read, the class could not be
-     *     found, or the class is not a subtype of the given supertype class.
+     *         found, or the class is not a subtype of the given supertype class.
      */
     public static <T> Class<T> resolveClassByName(
             DataInputView in, ClassLoader cl, Class<? super T> supertype) throws IOException {
