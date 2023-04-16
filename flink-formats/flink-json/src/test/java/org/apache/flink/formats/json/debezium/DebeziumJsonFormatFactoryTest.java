@@ -54,7 +54,7 @@ import static org.junit.Assert.fail;
 /** Tests for {@link DebeziumJsonFormatFactory}. */
 public class DebeziumJsonFormatFactoryTest extends TestLogger {
     @Rule public ExpectedException thrown = ExpectedException.none();
-
+    public static final String targetTableName = "product";
     @Test
     public void testSeDeSchema() {
         final DebeziumJsonDeserializationSchema expectedDeser =
@@ -81,6 +81,7 @@ public class DebeziumJsonFormatFactoryTest extends TestLogger {
 
         final DebeziumJsonSerializationSchema expectedSer =
                 new DebeziumJsonSerializationSchema(
+                        targetTableName,
                         (RowType) PHYSICAL_DATA_TYPE.getLogicalType(),
                         TimestampFormat.ISO_8601,
                         JsonOptions.MapNullKeyMode.LITERAL,

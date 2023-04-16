@@ -52,7 +52,7 @@ import static org.junit.Assert.assertEquals;
 /** Tests for {@link CanalJsonFormatFactory}. */
 public class CanalJsonFormatFactoryTest extends TestLogger {
     @Rule public ExpectedException thrown = ExpectedException.none();
-
+    private static final String targetTableName = "product";
     private static final InternalTypeInfo<RowData> ROW_TYPE_INFO =
             InternalTypeInfo.of(PHYSICAL_TYPE);
 
@@ -73,6 +73,7 @@ public class CanalJsonFormatFactoryTest extends TestLogger {
         // test Ser
         CanalJsonSerializationSchema expectedSer =
                 new CanalJsonSerializationSchema(
+                        targetTableName,
                         PHYSICAL_TYPE,
                         TimestampFormat.SQL,
                         JsonOptions.MapNullKeyMode.FAIL,
@@ -108,6 +109,7 @@ public class CanalJsonFormatFactoryTest extends TestLogger {
         // test Ser
         CanalJsonSerializationSchema expectedSer =
                 new CanalJsonSerializationSchema(
+                        targetTableName,
                         PHYSICAL_TYPE,
                         TimestampFormat.ISO_8601,
                         JsonOptions.MapNullKeyMode.LITERAL,

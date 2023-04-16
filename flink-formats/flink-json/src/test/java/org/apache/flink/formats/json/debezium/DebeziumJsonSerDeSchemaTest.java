@@ -254,6 +254,7 @@ public class DebeziumJsonSerDeSchemaTest {
 
         DebeziumJsonSerializationSchema serializationSchema =
                 new DebeziumJsonSerializationSchema(
+                        DebeziumJsonFormatFactoryTest.targetTableName,
                         (RowType) PHYSICAL_DATA_TYPE.getLogicalType(),
                         TimestampFormat.SQL,
                         JsonOptions.MapNullKeyMode.LITERAL,

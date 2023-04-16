@@ -59,7 +59,7 @@ import static org.junit.Assert.assertThat;
 public class CanalJsonSerDeSchemaTest {
 
     @Rule public ExpectedException thrown = ExpectedException.none();
-
+    private static final String targetTableName = "product";
     private static final DataType PHYSICAL_DATA_TYPE =
             ROW(
                     FIELD("id", INT().notNull()),
@@ -216,6 +216,7 @@ public class CanalJsonSerDeSchemaTest {
         // test Serialization
         CanalJsonSerializationSchema serializationSchema =
                 new CanalJsonSerializationSchema(
+                        targetTableName,
                         (RowType) PHYSICAL_DATA_TYPE.getLogicalType(),
                         TimestampFormat.ISO_8601,
                         JsonOptions.MapNullKeyMode.LITERAL,
