@@ -34,6 +34,15 @@ import java.util.stream.Collectors;
 /** This class holds configuration constants used by json format. */
 public class JsonOptions {
 
+    // baisui add form MQ table tag
+    public static final ConfigOption<String> TARGET_TABLE_NAME =
+            ConfigOptions.key("target-table-name")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription(
+                            "target table name");
+
+
     public static final ConfigOption<Boolean> FAIL_ON_MISSING_FIELD =
             ConfigOptions.key("fail-on-missing-field")
                     .booleanType()

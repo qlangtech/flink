@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.apache.flink.formats.json.JsonOptions.ENCODE_DECIMAL_AS_PLAIN_NUMBER;
+import static org.apache.flink.formats.json.JsonOptions.TARGET_TABLE_NAME;
 import static org.apache.flink.formats.json.canal.CanalJsonOptions.DATABASE_INCLUDE;
 import static org.apache.flink.formats.json.canal.CanalJsonOptions.IGNORE_PARSE_ERRORS;
 import static org.apache.flink.formats.json.canal.CanalJsonOptions.JSON_MAP_NULL_KEY_LITERAL;
@@ -71,6 +72,7 @@ public class CanalJsonFormatFactory
         final boolean ignoreParseErrors = formatOptions.get(IGNORE_PARSE_ERRORS);
         final TimestampFormat timestampFormat = JsonOptions.getTimestampFormat(formatOptions);
 
+
         return new CanalJsonDecodingFormat(database, table, ignoreParseErrors, timestampFormat);
     }
 
@@ -88,6 +90,8 @@ public class CanalJsonFormatFactory
         final boolean encodeDecimalAsPlainNumber =
                 formatOptions.get(ENCODE_DECIMAL_AS_PLAIN_NUMBER);
 
+        final String targetTableName = formatOptions.get(TARGET_TABLE_NAME);
+
         return new EncodingFormat<SerializationSchema<RowData>>() {
             @Override
             public ChangelogMode getChangelogMode() {
@@ -104,6 +108,7 @@ public class CanalJsonFormatFactory
                     DynamicTableSink.Context context, DataType consumedDataType) {
                 final RowType rowType = (RowType) consumedDataType.getLogicalType();
                 return new CanalJsonSerializationSchema(
+                        targetTableName,
                         rowType,
                         timestampFormat,
                         mapNullKeyMode,

@@ -19,4 +19,6 @@ mvn compile deploy -Pscala-${scala_version} -Dfast -DskipTests=true -DaltDeploym
 ,flink-connectors/flink-connector-jdbc\
 ,flink-table/flink-table-api-java-bridge\
 ,flink-connectors/flink-connector-kafka\
+,flink-connectors/flink-connector-rabbitmq\
+,flink-connectors/flink-connector-elasticsearch7\
  -am
