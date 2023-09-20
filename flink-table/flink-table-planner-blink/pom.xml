@@ -391,8 +391,8 @@ under the License.
 							<relocations>
 
 								<relocation>
-									<pattern>org.codehaus.janino</pattern>
-									<shadedPattern>org.apache.flink.calcite.shaded.org.codehaus.janino</shadedPattern>
+									<pattern>org.codehaus</pattern>
+									<shadedPattern>org.apache.flink.calcite.shaded.org.codehaus</shadedPattern>
 								</relocation>
 
 
