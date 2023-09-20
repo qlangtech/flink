@@ -160,15 +160,31 @@ under the License.
 		<!-- Can be set to any value to reproduce a specific build. -->
 		<test.randomization.seed/>
 		<test.unit.pattern>**/*Test.*</test.unit.pattern>
+		<releasesRepository>oss://maven.qlangtech.com/release</releasesRepository>
+		<snapshotRepository>oss://maven.qlangtech.com/snapshot</snapshotRepository>
 	</properties>
+
+	<distributionManagement>
+		<repository>
+			<id>apache.releases.https</id>
+			<url>${releasesRepository}</url>
+		</repository>
+		<snapshotRepository>
+			<id>apache.snapshots.https</id>
+			<url>${snapshotRepository}</url>
+			<uniqueVersion>true</uniqueVersion>
+		</snapshotRepository>
+	</distributionManagement>
+
+
 
 	<dependencies>
 
-		<dependency>
-			<groupId>org.apache.flink</groupId>
-			<artifactId>force-shading</artifactId>
-			<version>1.13.1</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.apache.flink</groupId>-->
+<!--			<artifactId>force-shading</artifactId>-->
+<!--			<version>1.13.1</version>-->
+<!--		</dependency>-->
 
 		<!-- Root dependencies for all projects -->
 
@@ -2140,6 +2156,13 @@ under the License.
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<extensions>
+			<extension>
+				<groupId>com.qlangtech.maven.cloud</groupId>
+				<artifactId>oss-storage-wagon</artifactId>
+				<version>3.0</version>
+			</extension>
+		</extensions>
 	</build>
 
 </project>
