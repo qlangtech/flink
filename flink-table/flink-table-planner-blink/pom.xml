@@ -389,6 +389,13 @@ under the License.
 								</includes>
 							</artifactSet>
 							<relocations>
+
+								<relocation>
+									<pattern>org.codehaus.janino</pattern>
+									<shadedPattern>org.apache.flink.calcite.shaded.org.codehaus.janino</shadedPattern>
+								</relocation>
+
+
 								<!-- Calcite is not relocated for now, because we expose it at some locations such as CalciteConfig -->
 								<!--<relocation>
 									<pattern>org.apache.calcite</pattern>
