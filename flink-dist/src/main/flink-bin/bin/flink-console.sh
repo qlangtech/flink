@@ -55,7 +55,8 @@ case $SERVICE in
     ;;
 
     (kubernetes-application)
-        CLASS_TO_RUN=org.apache.flink.kubernetes.entrypoint.KubernetesApplicationClusterEntrypoint
+        # baisui modify for tis entrypoint 2024/01/09
+        CLASS_TO_RUN=org.apache.flink.kubernetes.entrypoint.KubernetesApplicationClusterEntrypointOfTIS
     ;;
 
     (kubernetes-taskmanager)
