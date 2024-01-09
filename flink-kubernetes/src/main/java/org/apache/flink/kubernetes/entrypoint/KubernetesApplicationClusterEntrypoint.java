@@ -51,80 +51,80 @@ public final class KubernetesApplicationClusterEntrypoint extends ApplicationClu
         super(configuration, program, KubernetesResourceManagerFactory.getInstance());
     }
 
-    public static void main(final String[] args) {
-        if(1==1){
-            // baisui add
-            throw new UnsupportedOperationException();
-        }
-        // startup checks and logging
-        EnvironmentInformation.logEnvironmentInfo(
-                LOG, KubernetesApplicationClusterEntrypoint.class.getSimpleName(), args);
-        SignalHandler.register(LOG);
-        JvmShutdownSafeguard.installAsShutdownHook(LOG);
-
-        final Configuration dynamicParameters =
-                ClusterEntrypointUtils.parseParametersOrExit(
-                        args,
-                        new DynamicParametersConfigurationParserFactory(),
-                        KubernetesApplicationClusterEntrypoint.class);
-        final Configuration configuration =
-                KubernetesEntrypointUtils.loadConfiguration(dynamicParameters);
-
-        PackagedProgram program = null;
-        try {
-            program = getPackagedProgram(configuration);
-        } catch (Exception e) {
-            LOG.error("Could not create application program.", e);
-            System.exit(1);
-        }
-
-        try {
-            configureExecution(configuration, program);
-        } catch (Exception e) {
-            LOG.error("Could not apply application configuration.", e);
-            System.exit(1);
-        }
-
-        final KubernetesApplicationClusterEntrypoint kubernetesApplicationClusterEntrypoint =
-                new KubernetesApplicationClusterEntrypoint(configuration, program);
-
-        ClusterEntrypoint.runClusterEntrypoint(kubernetesApplicationClusterEntrypoint);
-    }
-
-    private static PackagedProgram getPackagedProgram(final Configuration configuration)
-            throws IOException, FlinkException {
-
-        final ApplicationConfiguration applicationConfiguration =
-                ApplicationConfiguration.fromConfiguration(configuration);
-
-        final PackagedProgramRetriever programRetriever =
-                getPackagedProgramRetriever(
-                        configuration,
-                        applicationConfiguration.getProgramArguments(),
-                        applicationConfiguration.getApplicationClassName());
-        return programRetriever.getPackagedProgram();
-    }
-
-    private static PackagedProgramRetriever getPackagedProgramRetriever(
-            final Configuration configuration,
-            final String[] programArguments,
-            @Nullable final String jobClassName)
-            throws IOException {
-
-        final File userLibDir = ClusterEntrypointUtils.tryFindUserLibDirectory().orElse(null);
-        final ClassPathPackagedProgramRetriever.Builder retrieverBuilder =
-                ClassPathPackagedProgramRetriever.newBuilder(programArguments)
-                        .setUserLibDirectory(userLibDir)
-                        .setJobClassName(jobClassName);
-
-        // No need to do pipelineJars validation if it is a PyFlink job.
-        if (!(PackagedProgramUtils.isPython(jobClassName)
-                || PackagedProgramUtils.isPython(programArguments))) {
-            final List<File> pipelineJars =
-                    KubernetesUtils.checkJarFileForApplicationMode(configuration);
-            Preconditions.checkArgument(pipelineJars.size() == 1, "Should only have one jar");
-            retrieverBuilder.setJarFile(pipelineJars.get(0));
-        }
-        return retrieverBuilder.build();
-    }
+//    public static void main(final String[] args) {
+//        if(1==1){
+//            // baisui add
+//            throw new UnsupportedOperationException();
+//        }
+//        // startup checks and logging
+//        EnvironmentInformation.logEnvironmentInfo(
+//                LOG, KubernetesApplicationClusterEntrypoint.class.getSimpleName(), args);
+//        SignalHandler.register(LOG);
+//        JvmShutdownSafeguard.installAsShutdownHook(LOG);
+//
+//        final Configuration dynamicParameters =
+//                ClusterEntrypointUtils.parseParametersOrExit(
+//                        args,
+//                        new DynamicParametersConfigurationParserFactory(),
+//                        KubernetesApplicationClusterEntrypoint.class);
+//        final Configuration configuration =
+//                KubernetesEntrypointUtils.loadConfiguration(dynamicParameters);
+//
+//        PackagedProgram program = null;
+//        try {
+//            program = getPackagedProgram(configuration);
+//        } catch (Exception e) {
+//            LOG.error("Could not create application program.", e);
+//            System.exit(1);
+//        }
+//
+//        try {
+//            configureExecution(configuration, program);
+//        } catch (Exception e) {
+//            LOG.error("Could not apply application configuration.", e);
+//            System.exit(1);
+//        }
+//
+//        final KubernetesApplicationClusterEntrypoint kubernetesApplicationClusterEntrypoint =
+//                new KubernetesApplicationClusterEntrypoint(configuration, program);
+//
+//        ClusterEntrypoint.runClusterEntrypoint(kubernetesApplicationClusterEntrypoint);
+//    }
+//
+//    private static PackagedProgram getPackagedProgram(final Configuration configuration)
+//            throws IOException, FlinkException {
+//
+//        final ApplicationConfiguration applicationConfiguration =
+//                ApplicationConfiguration.fromConfiguration(configuration);
+//
+//        final PackagedProgramRetriever programRetriever =
+//                getPackagedProgramRetriever(
+//                        configuration,
+//                        applicationConfiguration.getProgramArguments(),
+//                        applicationConfiguration.getApplicationClassName());
+//        return programRetriever.getPackagedProgram();
+//    }
+//
+//    private static PackagedProgramRetriever getPackagedProgramRetriever(
+//            final Configuration configuration,
+//            final String[] programArguments,
+//            @Nullable final String jobClassName)
+//            throws IOException {
+//
+//        final File userLibDir = ClusterEntrypointUtils.tryFindUserLibDirectory().orElse(null);
+//        final ClassPathPackagedProgramRetriever.Builder retrieverBuilder =
+//                ClassPathPackagedProgramRetriever.newBuilder(programArguments)
+//                        .setUserLibDirectory(userLibDir)
+//                        .setJobClassName(jobClassName);
+//
+//        // No need to do pipelineJars validation if it is a PyFlink job.
+//        if (!(PackagedProgramUtils.isPython(jobClassName)
+//                || PackagedProgramUtils.isPython(programArguments))) {
+//            final List<File> pipelineJars =
+//                    KubernetesUtils.checkJarFileForApplicationMode(configuration);
+//            Preconditions.checkArgument(pipelineJars.size() == 1, "Should only have one jar");
+//            retrieverBuilder.setJarFile(pipelineJars.get(0));
+//        }
+//        return retrieverBuilder.build();
+//    }
 }
