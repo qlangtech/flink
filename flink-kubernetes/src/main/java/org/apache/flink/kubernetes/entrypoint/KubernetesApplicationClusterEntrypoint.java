@@ -52,6 +52,10 @@ public final class KubernetesApplicationClusterEntrypoint extends ApplicationClu
     }
 
     public static void main(final String[] args) {
+        if(1==1){
+            // baisui add
+            throw new UnsupportedOperationException();
+        }
         // startup checks and logging
         EnvironmentInformation.logEnvironmentInfo(
                 LOG, KubernetesApplicationClusterEntrypoint.class.getSimpleName(), args);
