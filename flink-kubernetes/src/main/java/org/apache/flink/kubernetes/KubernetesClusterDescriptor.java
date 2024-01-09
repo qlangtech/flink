@@ -52,13 +52,10 @@ import org.apache.flink.runtime.highavailability.nonha.standalone.StandaloneClie
 import org.apache.flink.runtime.jobgraph.JobGraph;
 import org.apache.flink.runtime.jobmanager.HighAvailabilityMode;
 import org.apache.flink.util.FlinkException;
-import org.apache.flink.util.Preconditions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.List;
 import java.util.Optional;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
@@ -69,6 +66,7 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
     private static final Logger LOG = LoggerFactory.getLogger(KubernetesClusterDescriptor.class);
 
     private static final String CLUSTER_DESCRIPTION = "Kubernetes cluster";
+    private static final String KEY_TIS = "TIS";
 
     private final Configuration flinkConfig;
 
@@ -199,14 +197,16 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
         // No need to do pipelineJars validation if it is a PyFlink job.
         if (!(PackagedProgramUtils.isPython(applicationConfiguration.getApplicationClassName())
                 || PackagedProgramUtils.isPython(applicationConfiguration.getProgramArguments()))) {
-            final List<File> pipelineJars =
-                    KubernetesUtils.checkJarFileForApplicationMode(flinkConfig);
-            Preconditions.checkArgument(pipelineJars.size() == 1, "Should only have one jar");
+            // baisui modify for disable remote local jar fetch 2024/01/08
+//            final List<File> pipelineJars =
+//                    KubernetesUtils.checkJarFileForApplicationMode(flinkConfig);
+//            Preconditions.checkArgument(pipelineJars.size() == 1, "Should only have one jar");
         }
 
+        // baisui modfiy for change the entrypoint 2024/01/08
         final ClusterClientProvider<String> clusterClientProvider =
                 deployClusterInternal(
-                        KubernetesApplicationClusterEntrypoint.class.getName(),
+                        KEY_TIS + KubernetesApplicationClusterEntrypoint.class.getName(),
                         clusterSpecification,
                         false);
 
