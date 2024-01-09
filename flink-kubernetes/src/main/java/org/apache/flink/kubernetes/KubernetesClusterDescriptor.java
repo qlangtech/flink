@@ -66,7 +66,7 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
     private static final Logger LOG = LoggerFactory.getLogger(KubernetesClusterDescriptor.class);
 
     private static final String CLUSTER_DESCRIPTION = "Kubernetes cluster";
-    private static final String KEY_TIS = "TIS";
+    private static final String KEY_TIS = "OfTIS";
 
     private final Configuration flinkConfig;
 
@@ -203,10 +203,17 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
 //            Preconditions.checkArgument(pipelineJars.size() == 1, "Should only have one jar");
         }
 
+
         // baisui modfiy for change the entrypoint 2024/01/08
+       final String tisK8SClusterEntrypoint =  KubernetesApplicationClusterEntrypoint.class.getName() + KEY_TIS;
+        try {
+            Class.forName(tisK8SClusterEntrypoint);
+        } catch (ClassNotFoundException e) {
+            throw new ClusterDeploymentException(e);
+        }
         final ClusterClientProvider<String> clusterClientProvider =
                 deployClusterInternal(
-                        KEY_TIS + KubernetesApplicationClusterEntrypoint.class.getName(),
+                        tisK8SClusterEntrypoint,
                         clusterSpecification,
                         false);
 
