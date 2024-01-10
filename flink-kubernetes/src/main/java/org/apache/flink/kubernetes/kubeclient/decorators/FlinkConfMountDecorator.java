@@ -132,23 +132,28 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
     public static Map<String, ConfigMapData> configMapData;
 
     // baisui add 2024/01/10 for inject conf tis-web-config/config.properties
-  public static class  ConfigMapData{
-      private final String podPath;
-      private final String content;
+    public static class ConfigMapData {
+        private String podPath;
+        private final String content;
 
-      public ConfigMapData(String podPath, String content) {
-          this.podPath = podPath;
-          this.content = content;
-      }
+        public ConfigMapData(String podPath, String content) {
+            this.podPath = podPath;
+            this.content = content;
+        }
 
-      public String getPodPath() {
-          return podPath;
-      }
+        public String getPodPath() {
+            return podPath;
+        }
 
-      public String getContent() {
-          return content;
-      }
-  }
+        public ConfigMapData setPodPath(String podPath) {
+            this.podPath = podPath;
+            return this;
+        }
+
+        public String getContent() {
+            return content;
+        }
+    }
 
     @Override
     public List<HasMetadata> buildAccompanyingKubernetesResources() throws IOException {
@@ -157,7 +162,10 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
         final Map<String, String> data = new HashMap<>();
         // baisui add 2021/11/5 for inject configMap from client
         if (configMapData != null) {
-            data.putAll(configMapData.entrySet().stream().collect(Collectors.toMap((e)->e.getKey(),(e)->e.getValue().content)));
+            data.putAll(configMapData
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue().content)));
         } else {
             final List<File> localLogFiles = getLocalLogConfFiles();
             for (File file : localLogFiles) {
