@@ -26,12 +26,16 @@ import org.apache.flink.kubernetes.kubeclient.FlinkPod;
 import org.apache.flink.kubernetes.kubeclient.parameters.AbstractKubernetesParameters;
 import org.apache.flink.kubernetes.utils.Constants;
 
+import org.apache.flink.shaded.guava18.com.google.common.collect.Lists;
 import org.apache.flink.shaded.guava18.com.google.common.io.Files;
+
+import com.qlangtech.tis.config.BasicConfig;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KeyToPath;
 import io.fabric8.kubernetes.api.model.KeyToPathBuilder;
@@ -46,7 +50,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,8 +65,11 @@ import static org.apache.flink.util.Preconditions.checkNotNull;
 /**
  * Mounts the log4j.properties, logback.xml, and flink-conf.yaml configuration on the JobManager or
  * TaskManager pod.
+ * baisui modfiy 2024/01/10
  */
 public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
+
+    // public static final String TIS_CONF_VOLUME = "tis-config-volume";
 
     private final AbstractKubernetesParameters kubernetesComponentConf;
 
@@ -74,13 +80,21 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
     @Override
     public FlinkPod decorateFlinkPod(FlinkPod flinkPod) {
         final Pod mountedPod = decoratePod(flinkPod.getPodWithoutMainContainer());
-
+        EnvVar tisConfigPathEvn = new EnvVar();
+        tisConfigPathEvn.setName(BasicConfig.KEY_ENV_TIS_CFG_BUNDLE_PATH);
+        tisConfigPathEvn.setValue("conf/" + BasicConfig.KEY_DEFAULT_TIS_CFG_BUNDLE_PATH);
         final Container mountedMainContainer =
                 new ContainerBuilder(flinkPod.getMainContainer())
                         .addNewVolumeMount()
                         .withName(FLINK_CONF_VOLUME)
                         .withMountPath(kubernetesComponentConf.getFlinkConfDirInPod())
                         .endVolumeMount()
+                        .addToEnv(tisConfigPathEvn)
+                        // baisui add
+//                        .addNewVolumeMount()
+//                        .withName(TIS_CONF_VOLUME)
+//                        .withMountPath("/opt/flink")
+//                        .endVolumeMount()
                         .build();
 
         return new FlinkPod.Builder(flinkPod)
@@ -92,14 +106,14 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
     private Pod decoratePod(Pod pod) {
 
         // baisui add 2021/11/5 for inject configMap from client
-        final List<KeyToPath> keyToPaths = (configMapData == null)
+        final List<KeyToPath> keyToPaths = (flinkConfigMapData == null)
                 ? getLocalLogConfFiles().stream()
                 .map(file -> new KeyToPathBuilder()
                         .withKey(file.getName())
                         .withPath(file.getName())
                         .build())
                 .collect(Collectors.toList())
-                : configMapData.entrySet().stream().map((entry) -> new KeyToPathBuilder()
+                : flinkConfigMapData.entrySet().stream().map((entry) -> new KeyToPathBuilder()
                 .withKey(entry.getKey())
                 .withPath(entry.getValue().getPodPath())
                 .build()).collect(Collectors.toList());
@@ -120,16 +134,38 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
                         .endConfigMap()
                         .build();
 
+//        if (MapUtils.isEmpty(tisConfigMapData)) {
+//            throw new IllegalStateException("tisConfigMapData can not be null");
+//        }
+
+//        final Volume tisConfVolume =
+//                new VolumeBuilder()
+//                        .withName(TIS_CONF_VOLUME)
+//                        .withNewConfigMap()
+//                        .withName(getTISConfConfigMapName(kubernetesComponentConf.getClusterId()))
+//                        .withItems(tisConfigMapData
+//                                .entrySet()
+//                                .stream()
+//                                .map((entry) -> new KeyToPathBuilder()
+//                                        .withKey(entry.getKey())
+//                                        .withPath(entry.getValue().getPodPath())
+//                                        .build())
+//                                .collect(Collectors.toList()))
+//                        .endConfigMap()
+//                        .build();
+
         return new PodBuilder(pod)
                 .editSpec()
                 .addNewVolumeLike(flinkConfVolume)
                 .endVolume()
+                //  .addNewVolumeLike(tisConfVolume).endVolume()
                 .endSpec()
                 .build();
     }
 
     // baisui add 2021/11/5 for inject configMap from client
-    public static Map<String, ConfigMapData> configMapData;
+    public static Map<String, ConfigMapData> flinkConfigMapData;
+    //   public static Map<String, ConfigMapData> tisConfigMapData;
 
     // baisui add 2024/01/10 for inject conf tis-web-config/config.properties
     public static class ConfigMapData {
@@ -161,8 +197,8 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
 
         final Map<String, String> data = new HashMap<>();
         // baisui add 2021/11/5 for inject configMap from client
-        if (configMapData != null) {
-            data.putAll(configMapData
+        if (flinkConfigMapData != null) {
+            data.putAll(flinkConfigMapData
                     .entrySet()
                     .stream()
                     .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue().content)));
@@ -188,7 +224,27 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
                         .addToData(data)
                         .build();
 
-        return Collections.singletonList(flinkConfConfigMap);
+//        if (MapUtils.isEmpty(tisConfigMapData)) {
+//            throw new IllegalStateException("tisConfigMapData can not be empty");
+//        }
+
+//        final ConfigMap tisConfConfigMap =
+//                new ConfigMapBuilder()
+//                        .withApiVersion(Constants.API_VERSION)
+//                        .withNewMetadata()
+//                        .withName(getTISConfConfigMapName(clusterId))
+//                        .withLabels(kubernetesComponentConf.getCommonLabels())
+//                        .endMetadata()
+//                        .addToData(tisConfigMapData
+//                                .entrySet()
+//                                .stream()
+//                                .collect(Collectors.toMap(
+//                                        (e) -> e.getKey(),
+//                                        (e) -> e.getValue().content)))
+//                        .build();
+        return Lists.newArrayList(flinkConfConfigMap);
+
+        //   return Collections.singletonList(flinkConfConfigMap);
     }
 
     /** Get properties map for the cluster-side after removal of some keys. */
@@ -235,4 +291,8 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
     public static String getFlinkConfConfigMapName(String clusterId) {
         return CONFIG_MAP_PREFIX + clusterId;
     }
+
+//    public static String getTISConfConfigMapName(String clusterId) {
+//        return "tis-" + getFlinkConfConfigMapName(clusterId);
+//    }
 }
