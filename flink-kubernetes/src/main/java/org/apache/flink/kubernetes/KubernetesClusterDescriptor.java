@@ -206,11 +206,11 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
 
         // baisui modfiy for change the entrypoint 2024/01/08
        final String tisK8SClusterEntrypoint =  KubernetesApplicationClusterEntrypoint.class.getName() + KEY_TIS;
-        try {
-            Class.forName(tisK8SClusterEntrypoint);
-        } catch (ClassNotFoundException e) {
-            throw new ClusterDeploymentException(e);
-        }
+//        try {
+//            Class.forName(tisK8SClusterEntrypoint);
+//        } catch (ClassNotFoundException e) {
+//            throw new ClusterDeploymentException(e);
+//        }
         final ClusterClientProvider<String> clusterClientProvider =
                 deployClusterInternal(
                         tisK8SClusterEntrypoint,
