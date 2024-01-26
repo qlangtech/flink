@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.function.Consumer;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
 
@@ -105,6 +106,13 @@ public class KubernetesSessionCli {
 
     // baisui modify make it public
     public String run(String[] args) throws FlinkException, CliArgsException {
+        return run(args, (clientConsumer) -> {
+        });
+    }
+
+    public String run(
+            String[] args,
+            Consumer<ClusterClient<String>> clusterClientConsumer) throws FlinkException, CliArgsException {
         final Configuration configuration = getEffectiveConfiguration(args);
 
         final ClusterClientFactory<String> kubernetesClusterClientFactory =
@@ -132,7 +140,8 @@ public class KubernetesSessionCli {
                                 .getClusterClient();
                 clusterId = clusterClient.getClusterId();
             }
-
+            // baisui add for process clusterClient
+            clusterClientConsumer.accept(clusterClient);
             try {
                 if (!detached) {
                     Tuple2<Boolean, Boolean> continueRepl = new Tuple2<>(true, false);
