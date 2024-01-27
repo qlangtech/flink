@@ -270,6 +270,9 @@ under the License.
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
+				<!--baisui modify 2024/01/09-->
+				<version>3.5.1</version>
+
 				<configuration>
 					<!-- Base config -->
 					<createDependencyReducedPom>true</createDependencyReducedPom>
@@ -318,6 +321,11 @@ under the License.
 							<pattern>org.apache.calcite</pattern>
 							<shadedPattern>org.apache.flink.calcite.shaded.org.apache.calcite</shadedPattern>
 						</relocation>-->
+						<relocation>
+							<pattern>org.codehaus</pattern>
+							<shadedPattern>org.apache.flink.calcite.shaded.org.codehaus</shadedPattern>
+						</relocation>
+
 
 						<!-- Calcite's dependencies -->
 						<!-- Keep it in sync with flink-sql-client -->
@@ -356,6 +364,18 @@ under the License.
 							<shadedPattern>org.apache.flink.table.shaded.com.ibm.icu</shadedPattern>
 						</relocation>
 					</relocations>
+					<transformers>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.properties.PropertiesTransformer">
+							<!-- required configuration -->
+							<resource>org.codehaus.commons.compiler.properties</resource>
+							<ordinalKey>ordinal</ordinalKey>
+							<!-- optional configuration -->
+							<alreadyMergedKey>already_merged</alreadyMergedKey>
+							<defaultOrdinal>0</defaultOrdinal>
+							<reverseOrder>false</reverseOrder>
+						</transformer>
+					</transformers>
 				</configuration>
 			</plugin>
 

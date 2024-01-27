@@ -76,15 +76,19 @@ final class CopyingChainingOutput<T> extends ChainingOutput<T> {
         } catch (ClassCastException e) {
             if (outputTag != null) {
                 // Enrich error message
-                ClassCastException replace =
-                        new ClassCastException(
-                                String.format(
-                                        "%s. Failed to push OutputTag with id '%s' to operator. "
-                                                + "This can occur when multiple OutputTags with different types "
-                                                + "but identical names are being used.",
-                                        e.getMessage(), outputTag.getId()));
+//                ClassCastException replace =
+//                        new ClassCastException(
+//                                String.format(
+//                                        "%s. Failed to push OutputTag with id '%s' to operator. "
+//                                                + "This can occur when multiple OutputTags with different types "
+//                                                + "but identical names are being used.",
+//                                        e.getMessage(), outputTag.getId()));
 
-                throw new ExceptionInChainedOperatorException(replace);
+                throw new ExceptionInChainedOperatorException(String.format(
+                                                "%s. Failed to push OutputTag with id '%s' to operator. "
+                                                                + "This can occur when multiple OutputTags with different types "
+                                                                + "but identical names are being used.",
+                                                e.getMessage(), outputTag.getId()),e);
             } else {
                 throw new ExceptionInChainedOperatorException(e);
             }

@@ -71,7 +71,7 @@ under the License.
 		<module>flink-filesystems</module>
 		<module>flink-rpc</module>
 		<module>flink-runtime</module>
-		<module>flink-runtime-web</module>
+<!--		<module>flink-runtime-web</module>-->
 		<module>flink-optimizer</module>
 		<module>flink-streaming-java</module>
 		<module>flink-streaming-scala</module>
@@ -82,7 +82,7 @@ under the License.
 		<module>flink-container</module>
 		<module>flink-queryable-state</module>
 		<module>flink-tests</module>
-		<module>flink-end-to-end-tests</module>
+<!--		<module>flink-end-to-end-tests</module>-->
 		<module>flink-test-utils-parent</module>
 		<module>flink-state-backends</module>
 		<module>flink-dstl</module>
@@ -94,9 +94,9 @@ under the License.
 		<module>flink-dist-scala</module>
 		<module>flink-metrics</module>
 		<module>flink-yarn</module>
-		<module>flink-yarn-tests</module>
-		<module>flink-fs-tests</module>
-		<module>flink-docs</module>
+<!--		<module>flink-yarn-tests</module>-->
+<!--		<module>flink-fs-tests</module>-->
+<!--		<module>flink-docs</module>-->
 		<module>flink-python</module>
 		<module>flink-walkthroughs</module>
 		<module>flink-kubernetes</module>
@@ -209,11 +209,11 @@ under the License.
 
 	<dependencies>
 
-		<dependency>
-			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-shaded-force-shading</artifactId>
-			<optional>${flink.markBundledAsOptional}</optional>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.apache.flink</groupId>-->
+<!--			<artifactId>flink-shaded-force-shading</artifactId>-->
+<!--			<optional>${flink.markBundledAsOptional}</optional>-->
+<!--		</dependency>-->
 
 		<!-- Root dependencies for all projects -->
 
@@ -2294,6 +2294,14 @@ under the License.
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<extensions>
+			<extension>
+				<groupId>com.qlangtech.maven.cloud</groupId>
+				<artifactId>oss-storage-wagon</artifactId>
+				<version>3.0</version>
+			</extension>
+		</extensions>
+
 	</build>
 
 </project>

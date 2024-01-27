@@ -52,6 +52,7 @@ class CanalJsonFormatFactoryTest {
 
     private static final InternalTypeInfo<RowData> ROW_TYPE_INFO =
             InternalTypeInfo.of(PHYSICAL_TYPE);
+    private static final String targetTableName = "product";
 
     @Test
     void testDefaultOptions() {
@@ -70,6 +71,7 @@ class CanalJsonFormatFactoryTest {
         // test Ser
         CanalJsonSerializationSchema expectedSer =
                 new CanalJsonSerializationSchema(
+                        targetTableName,
                         PHYSICAL_TYPE,
                         TimestampFormat.SQL,
                         JsonFormatOptions.MapNullKeyMode.FAIL,
@@ -105,6 +107,7 @@ class CanalJsonFormatFactoryTest {
         // test Ser
         CanalJsonSerializationSchema expectedSer =
                 new CanalJsonSerializationSchema(
+                        targetTableName,
                         PHYSICAL_TYPE,
                         TimestampFormat.ISO_8601,
                         JsonFormatOptions.MapNullKeyMode.LITERAL,

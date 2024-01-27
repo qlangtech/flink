@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
 import static org.apache.flink.util.FlinkUserCodeClassLoader.NOOP_EXCEPTION_HANDLER;
@@ -37,7 +38,7 @@ import static org.apache.flink.util.FlinkUserCodeClassLoader.NOOP_EXCEPTION_HAND
 public class FlinkUserCodeClassLoaders {
 
     private FlinkUserCodeClassLoaders() {}
-
+    // baisui modify for client side classloader extension
     public static MutableURLClassLoader parentFirst(
             URL[] urls,
             ClassLoader parent,
@@ -102,7 +103,7 @@ public class FlinkUserCodeClassLoaders {
         }
     }
 
-    private static MutableURLClassLoader wrapWithSafetyNet(
+    public static MutableURLClassLoader wrapWithSafetyNet(
             FlinkUserCodeClassLoader classLoader, boolean check) {
         return check
                 ? new SafetyNetWrapperClassLoader(classLoader, classLoader.getParent())

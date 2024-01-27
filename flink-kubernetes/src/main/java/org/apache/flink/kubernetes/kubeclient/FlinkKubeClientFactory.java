@@ -45,6 +45,7 @@ public class FlinkKubeClientFactory {
     public static FlinkKubeClientFactory getInstance() {
         return INSTANCE;
     }
+    public static Config kubeConfig;
 
     /**
      * Create a Flink Kubernetes client with the given configuration.
@@ -65,7 +66,10 @@ public class FlinkKubeClientFactory {
 
         final String kubeConfigFile =
                 flinkConfig.getString(KubernetesConfigOptions.KUBE_CONFIG_FILE);
-        if (kubeConfigFile != null) {
+         // baisui 20211104 modify for config inject form context
+        if (kubeConfig != null) {
+            config = kubeConfig;
+        }else  if (kubeConfigFile != null) {
             LOG.debug("Trying to load kubernetes config from file: {}.", kubeConfigFile);
             try {
                 // If kubeContext is null, the default context in the kubeConfigFile will be used.

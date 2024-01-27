@@ -43,7 +43,7 @@ import org.apache.flink.types.RowKind;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
+import static org.apache.flink.formats.json.JsonFormatOptions.TARGET_TABLE_NAME;
 import static org.apache.flink.formats.json.JsonFormatOptions.ENCODE_DECIMAL_AS_PLAIN_NUMBER;
 import static org.apache.flink.formats.json.debezium.DebeziumJsonFormatOptions.IGNORE_PARSE_ERRORS;
 import static org.apache.flink.formats.json.debezium.DebeziumJsonFormatOptions.JSON_MAP_NULL_KEY_LITERAL;
@@ -92,6 +92,7 @@ public class DebeziumJsonFormatFactory
 
         final boolean encodeDecimalAsPlainNumber =
                 formatOptions.get(ENCODE_DECIMAL_AS_PLAIN_NUMBER);
+        String targetTableName = formatOptions.get(TARGET_TABLE_NAME);
 
         return new EncodingFormat<SerializationSchema<RowData>>() {
 
@@ -110,6 +111,7 @@ public class DebeziumJsonFormatFactory
                     DynamicTableSink.Context context, DataType consumedDataType) {
                 final RowType rowType = (RowType) consumedDataType.getLogicalType();
                 return new DebeziumJsonSerializationSchema(
+                         targetTableName,
                         rowType,
                         timestampFormat,
                         mapNullKeyMode,

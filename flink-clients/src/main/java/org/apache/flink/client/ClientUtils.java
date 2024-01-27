@@ -28,12 +28,15 @@ import org.apache.flink.client.program.StreamContextEnvironment;
 import org.apache.flink.client.program.rest.retry.ExponentialWaitStrategy;
 import org.apache.flink.client.program.rest.retry.WaitStrategy;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.core.execution.PipelineExecutorServiceLoader;
 import org.apache.flink.runtime.client.JobInitializationException;
+import org.apache.flink.runtime.execution.librarycache.ClassLoaderFactoryBuilder;
 import org.apache.flink.runtime.jobmaster.JobResult;
 import org.apache.flink.util.ExceptionUtils;
+import org.apache.flink.util.FlinkUserCodeClassLoader;
 import org.apache.flink.util.FlinkUserCodeClassLoaders;
 import org.apache.flink.util.SerializedThrowable;
 import org.apache.flink.util.function.SupplierWithException;
@@ -43,8 +46,10 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -67,6 +72,26 @@ public enum ClientUtils {
         for (int i = 0; i < classpaths.size(); i++) {
             urls[i + jars.size()] = classpaths.get(i);
         }
+        // 202011103 baisui add from client side classLoader extension
+        ServiceLoader<ClassLoaderFactoryBuilder> classLoaderService =
+                                ServiceLoader.load(ClassLoaderFactoryBuilder.class);
+        Iterator<ClassLoaderFactoryBuilder> factoryIt = classLoaderService.iterator();
+        ClassLoaderFactoryBuilder factory = null;
+        while (factoryIt.hasNext()) {
+                        factory = factoryIt.next();
+            final String[] alwaysParentFirstLoaderPatterns =
+                    CoreOptions.getParentFirstLoaderPatterns(configuration);
+            final String classLoaderResolveOrder = configuration.get(CoreOptions.CLASSLOADER_RESOLVE_ORDER);
+            final FlinkUserCodeClassLoaders.ResolveOrder resolveOrder =
+                    FlinkUserCodeClassLoaders.ResolveOrder.fromString(classLoaderResolveOrder);
+            final boolean checkClassloaderLeak = configuration.get(CoreOptions.CHECK_LEAKED_CLASSLOADER);
+                        return factory.buildClientLoaderFactory(
+                                        resolveOrder,
+                                        alwaysParentFirstLoaderPatterns,
+                                        FlinkUserCodeClassLoader.NOOP_EXCEPTION_HANDLER,
+                                        checkClassloaderLeak).createClassLoader(urls);
+                    }
+
         return FlinkUserCodeClassLoaders.create(urls, parent, configuration);
     }
 

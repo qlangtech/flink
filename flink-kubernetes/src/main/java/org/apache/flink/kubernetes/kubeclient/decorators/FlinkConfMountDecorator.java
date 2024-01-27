@@ -31,10 +31,13 @@ import org.apache.flink.kubernetes.utils.Constants;
 
 import org.apache.flink.shaded.guava31.com.google.common.io.Files;
 
+import com.qlangtech.tis.config.BasicConfig;
+
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KeyToPath;
 import io.fabric8.kubernetes.api.model.KeyToPathBuilder;
@@ -65,6 +68,7 @@ import static org.apache.flink.util.Preconditions.checkNotNull;
 /**
  * Mounts the log4j.properties, logback.xml, and flink-conf.yaml configuration on the JobManager or
  * TaskManager pod.
+ * baisui modfiy 2024/01/10
  */
 public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
 
@@ -77,6 +81,9 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
     @Override
     public FlinkPod decorateFlinkPod(FlinkPod flinkPod) {
         final Pod mountedPod = decoratePod(flinkPod.getPodWithoutMainContainer());
+        EnvVar tisConfigPathEvn = new EnvVar();
+        tisConfigPathEvn.setName(BasicConfig.KEY_ENV_TIS_CFG_BUNDLE_PATH);
+        tisConfigPathEvn.setValue("conf/" + BasicConfig.KEY_DEFAULT_TIS_CFG_BUNDLE_PATH);
 
         final Container mountedMainContainer =
                 new ContainerBuilder(flinkPod.getMainContainer())
@@ -84,6 +91,7 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
                         .withName(FLINK_CONF_VOLUME)
                         .withMountPath(kubernetesComponentConf.getFlinkConfDirInPod())
                         .endVolumeMount()
+                        .addToEnv(tisConfigPathEvn)
                         .build();
 
         return new FlinkPod.Builder(flinkPod)
@@ -93,15 +101,19 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
     }
 
     private Pod decoratePod(Pod pod) {
-        final List<KeyToPath> keyToPaths =
-                getLocalLogConfFiles().stream()
-                        .map(
-                                file ->
-                                        new KeyToPathBuilder()
-                                                .withKey(file.getName())
-                                                .withPath(file.getName())
-                                                .build())
-                        .collect(Collectors.toList());
+        // baisui add 2021/11/5 for inject configMap from client
+        final List<KeyToPath> keyToPaths = (flinkConfigMapData == null)
+                ? getLocalLogConfFiles().stream()
+                .map(file -> new KeyToPathBuilder()
+                        .withKey(file.getName())
+                        .withPath(file.getName())
+                        .build())
+                .collect(Collectors.toList())
+                : flinkConfigMapData.entrySet().stream().map((entry) -> new KeyToPathBuilder()
+                .withKey(entry.getKey())
+                .withPath(entry.getValue().getPodPath())
+                .build()).collect(Collectors.toList());
+
         keyToPaths.add(
                 new KeyToPathBuilder()
                         .withKey(FLINK_CONF_FILENAME)
@@ -125,15 +137,55 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
                 .build();
     }
 
+    // baisui add 2021/11/5 for inject configMap from client
+    public static Map<String, ConfigMapData> flinkConfigMapData;
+    //   public static Map<String, ConfigMapData> tisConfigMapData;
+
+    // baisui add 2024/01/10 for inject conf tis-web-config/config.properties
+    public static class ConfigMapData {
+        private String podPath;
+        private final String content;
+
+        public ConfigMapData(String podPath, String content) {
+            this.podPath = podPath;
+            this.content = content;
+        }
+
+        public String getPodPath() {
+            return podPath;
+        }
+
+        public ConfigMapData setPodPath(String podPath) {
+            this.podPath = podPath;
+            return this;
+        }
+
+        public String getContent() {
+            return content;
+        }
+    }
+
     @Override
     public List<HasMetadata> buildAccompanyingKubernetesResources() throws IOException {
         final String clusterId = kubernetesComponentConf.getClusterId();
 
         final Map<String, String> data = new HashMap<>();
 
-        final List<File> localLogFiles = getLocalLogConfFiles();
-        for (File file : localLogFiles) {
-            data.put(file.getName(), Files.toString(file, StandardCharsets.UTF_8));
+//        final List<File> localLogFiles = getLocalLogConfFiles();
+//        for (File file : localLogFiles) {
+//            data.put(file.getName(), Files.toString(file, StandardCharsets.UTF_8));
+        // baisui add 2021/11/5 for inject configMap from client
+        if (flinkConfigMapData != null) {
+            data.putAll(flinkConfigMapData
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue().content)));
+        } else {
+            final List<File> localLogFiles = getLocalLogConfFiles();
+            for (File file : localLogFiles) {
+                data.put(file.getName(), Files.toString(file, StandardCharsets.UTF_8));
+            }
+
         }
 
         final Map<String, String> propertiesMap =
@@ -169,7 +221,7 @@ public class FlinkConfMountDecorator extends AbstractKubernetesStepDecorator {
     @VisibleForTesting
     String getFlinkConfData(Map<String, String> propertiesMap) throws IOException {
         try (StringWriter sw = new StringWriter();
-                PrintWriter out = new PrintWriter(sw)) {
+             PrintWriter out = new PrintWriter(sw)) {
             propertiesMap.forEach(
                     (k, v) -> {
                         out.print(k);

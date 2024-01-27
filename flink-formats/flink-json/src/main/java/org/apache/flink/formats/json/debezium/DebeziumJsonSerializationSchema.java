@@ -28,6 +28,7 @@ import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.data.StringData;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.RowType;
+import org.apache.flink.util.StringUtils;
 
 import java.util.Objects;
 
@@ -50,13 +51,23 @@ public class DebeziumJsonSerializationSchema implements SerializationSchema<RowD
     private final JsonRowDataSerializationSchema jsonSerializer;
 
     private transient GenericRowData genericRowData;
+    private transient GenericRowData source;
+    //
+    private final String targetTableName;
+
 
     public DebeziumJsonSerializationSchema(
+            String targetTableName,
             RowType rowType,
             TimestampFormat timestampFormat,
             JsonFormatOptions.MapNullKeyMode mapNullKeyMode,
             String mapNullKeyLiteral,
             boolean encodeDecimalAsPlainNumber) {
+            if (StringUtils.isNullOrWhitespaceOnly(targetTableName)) {
+                throw new IllegalArgumentException("param targetTableName can not be null");
+            }
+            this.targetTableName = targetTableName;
+
         jsonSerializer =
                 new JsonRowDataSerializationSchema(
                         createJsonRowType(fromLogicalToDataType(rowType)),
@@ -69,7 +80,9 @@ public class DebeziumJsonSerializationSchema implements SerializationSchema<RowD
     @Override
     public void open(InitializationContext context) throws Exception {
         jsonSerializer.open(context);
-        genericRowData = new GenericRowData(3);
+        genericRowData = new GenericRowData(5);
+        this.source = new GenericRowData(1);
+        source.setField(0, StringData.fromString(this.targetTableName));
     }
 
     @Override
@@ -81,12 +94,18 @@ public class DebeziumJsonSerializationSchema implements SerializationSchema<RowD
                     genericRowData.setField(0, null);
                     genericRowData.setField(1, rowData);
                     genericRowData.setField(2, OP_INSERT);
+                    genericRowData.setField(3, source);
+                    genericRowData.setField(4, System.currentTimeMillis());
+
                     return jsonSerializer.serialize(genericRowData);
                 case UPDATE_BEFORE:
                 case DELETE:
                     genericRowData.setField(0, rowData);
                     genericRowData.setField(1, null);
                     genericRowData.setField(2, OP_DELETE);
+                    genericRowData.setField(3, source);
+                    genericRowData.setField(4, System.currentTimeMillis());
+
                     return jsonSerializer.serialize(genericRowData);
                 default:
                     throw new UnsupportedOperationException(
@@ -121,9 +140,13 @@ public class DebeziumJsonSerializationSchema implements SerializationSchema<RowD
         // but we don't need them.
         return (RowType)
                 DataTypes.ROW(
-                                DataTypes.FIELD("before", databaseSchema),
-                                DataTypes.FIELD("after", databaseSchema),
-                                DataTypes.FIELD("op", DataTypes.STRING()))
+                        DataTypes.FIELD("before", databaseSchema),
+                        DataTypes.FIELD("after", databaseSchema),
+                        DataTypes.FIELD("op", DataTypes.STRING()),
+                         DataTypes.FIELD(
+                              "source",
+                             DataTypes.ROW(DataTypes.FIELD("table", DataTypes.STRING()))),
+                            DataTypes.FIELD("ts_ms", DataTypes.BIGINT()))
                         .getLogicalType();
     }
 }

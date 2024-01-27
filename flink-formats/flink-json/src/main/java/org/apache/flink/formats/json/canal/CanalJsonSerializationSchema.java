@@ -31,6 +31,7 @@ import org.apache.flink.table.data.StringData;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.types.RowKind;
+import org.apache.flink.util.StringUtils;
 
 import java.util.Objects;
 
@@ -53,13 +54,21 @@ public class CanalJsonSerializationSchema implements SerializationSchema<RowData
 
     /** The serializer to serialize Canal JSON data. */
     private final JsonRowDataSerializationSchema jsonSerializer;
+    private final String targetTableName;
+
 
     public CanalJsonSerializationSchema(
+            String targetTableName,
             RowType rowType,
             TimestampFormat timestampFormat,
             JsonFormatOptions.MapNullKeyMode mapNullKeyMode,
             String mapNullKeyLiteral,
             boolean encodeDecimalAsPlainNumber) {
+                if (StringUtils.isNullOrWhitespaceOnly(targetTableName)) {
+                        throw new IllegalArgumentException("param targetTableName can not be null");
+                    }
+                this.targetTableName = targetTableName;
+
         jsonSerializer =
                 new JsonRowDataSerializationSchema(
                         createJsonRowType(fromLogicalToDataType(rowType)),
@@ -72,7 +81,7 @@ public class CanalJsonSerializationSchema implements SerializationSchema<RowData
     @Override
     public void open(InitializationContext context) throws Exception {
         jsonSerializer.open(context);
-        reuse = new GenericRowData(2);
+        reuse = new GenericRowData(4);
     }
 
     @Override
@@ -82,6 +91,9 @@ public class CanalJsonSerializationSchema implements SerializationSchema<RowData
             ArrayData arrayData = new GenericArrayData(new RowData[] {row});
             reuse.setField(0, arrayData);
             reuse.setField(1, opType);
+            reuse.setField(2, StringData.fromString(this.targetTableName));
+            reuse.setField(3, System.currentTimeMillis());
+
             return jsonSerializer.serialize(reuse);
         } catch (Throwable t) {
             throw new RuntimeException("Could not serialize row '" + row + "'.", t);
@@ -124,9 +136,10 @@ public class CanalJsonSerializationSchema implements SerializationSchema<RowData
         // but we don't need them
         // and we don't need "old" , because can not support UPDATE_BEFORE,UPDATE_AFTER
         return (RowType)
-                DataTypes.ROW(
-                                DataTypes.FIELD("data", DataTypes.ARRAY(databaseSchema)),
-                                DataTypes.FIELD("type", DataTypes.STRING()))
+                DataTypes.ROW(DataTypes.FIELD("data", DataTypes.ARRAY(databaseSchema)),
+                        DataTypes.FIELD("type", DataTypes.STRING()),
+                        DataTypes.FIELD("table", DataTypes.STRING()),
+                        DataTypes.FIELD("ts", DataTypes.BIGINT()))
                         .getLogicalType();
     }
 }

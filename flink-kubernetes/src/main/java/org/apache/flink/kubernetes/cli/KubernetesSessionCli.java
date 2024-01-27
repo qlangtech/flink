@@ -41,12 +41,14 @@ import org.apache.flink.runtime.security.SecurityUtils;
 import org.apache.flink.util.FlinkException;
 
 import org.apache.commons.cli.CommandLine;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.function.Consumer;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
 
@@ -90,7 +92,30 @@ public class KubernetesSessionCli {
         return effectiveConfiguration;
     }
 
-    private int run(String[] args) throws FlinkException, CliArgsException {
+    // baisui add for killCluster
+    public void killCluster(String clusterId) throws FlinkException, CliArgsException {
+        final Configuration configuration = getEffectiveConfiguration(new String[]{});
+
+        final ClusterClientFactory<String> kubernetesClusterClientFactory =
+                clusterClientServiceLoader.getClusterClientFactory(configuration);
+
+        try (final ClusterDescriptor<String> kubernetesClusterDescriptor =
+                     kubernetesClusterClientFactory.createClusterDescriptor(configuration)) {
+            kubernetesClusterDescriptor.killCluster(clusterId);
+        }
+    }
+
+    // baisui modify make it public
+    public String run(String[] args) throws FlinkException, CliArgsException {
+        return run(args, (clientConsumer) -> {
+        });
+    }
+
+
+    public String run(
+            String[] args,
+            Consumer<ClusterClient<String>> clusterClientConsumer) throws FlinkException, CliArgsException {
+
         final Configuration configuration = getEffectiveConfiguration(args);
 
         final ClusterClientFactory<String> kubernetesClusterClientFactory =
@@ -121,6 +146,8 @@ public class KubernetesSessionCli {
                                 .getClusterClient();
                 clusterId = clusterClient.getClusterId();
             }
+            // baisui add for process clusterClient
+            clusterClientConsumer.accept(clusterClient);
 
             try {
                 if (!detached) {
@@ -143,6 +170,7 @@ public class KubernetesSessionCli {
             } catch (Exception e) {
                 LOG.info("Could not properly shutdown cluster client.", e);
             }
+          return   clusterId;
         } finally {
             try {
                 kubernetesClusterDescriptor.close();
@@ -151,7 +179,7 @@ public class KubernetesSessionCli {
             }
         }
 
-        return 0;
+      //  return 0;
     }
 
     /**
@@ -199,7 +227,10 @@ public class KubernetesSessionCli {
 
         try {
             final KubernetesSessionCli cli = new KubernetesSessionCli(configuration, configDir);
-            retCode = SecurityUtils.getInstalledContext().runSecured(() -> cli.run(args));
+            retCode = SecurityUtils.getInstalledContext().runSecured(() -> {
+                cli.run(args);
+                return 0;
+            });
         } catch (CliArgsException e) {
             retCode = AbstractCustomCommandLine.handleCliArgsException(e, LOG);
         } catch (Exception e) {

@@ -39,6 +39,13 @@ under the License.
 	</properties>
 
 	<dependencies>
+		<!-- baisui add for Config BasicConfig.KEY_ENV_TIS_CFG_BUNDLE_PATH-->
+		<dependency>
+			<groupId>com.qlangtech.tis</groupId>
+			<artifactId>tis-config</artifactId>
+			<version>1.0.0</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- core dependencies  -->
 

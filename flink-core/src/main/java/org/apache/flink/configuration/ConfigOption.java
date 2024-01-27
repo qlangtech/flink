@@ -74,7 +74,7 @@ public class ConfigOption<T> {
 
     // ------------------------------------------------------------------------
 
-    Class<?> getClazz() {
+    public Class<?> getClazz() {
         return clazz;
     }
 

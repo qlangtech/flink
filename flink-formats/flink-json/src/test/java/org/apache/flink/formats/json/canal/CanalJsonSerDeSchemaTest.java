@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link CanalJsonSerializationSchema} and {@link CanalJsonDeserializationSchema}. */
 class CanalJsonSerDeSchemaTest {
-
+    private static final String targetTableName = "product";
     private static final DataType PHYSICAL_DATA_TYPE =
             ROW(
                     FIELD("id", INT().notNull()),
@@ -214,6 +214,7 @@ class CanalJsonSerDeSchemaTest {
         // test Serialization
         CanalJsonSerializationSchema serializationSchema =
                 new CanalJsonSerializationSchema(
+                        targetTableName,
                         (RowType) PHYSICAL_DATA_TYPE.getLogicalType(),
                         TimestampFormat.ISO_8601,
                         JsonFormatOptions.MapNullKeyMode.LITERAL,

@@ -473,12 +473,16 @@ public final class InstantiationUtil {
     @Nullable
     public static <T> T readObjectFromConfig(Configuration config, String key, ClassLoader cl)
             throws IOException, ClassNotFoundException {
-        byte[] bytes = config.getBytes(key, null);
-        if (bytes == null) {
-            return null;
-        }
+        try {
+            byte[] bytes = config.getBytes(key, null);
+            if (bytes == null) {
+                return null;
+            }
 
-        return deserializeObject(bytes, cl);
+            return deserializeObject(bytes, cl);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("key:" + key, e);
+        }
     }
 
     public static void writeObjectToConfig(Object o, Configuration config, String key)

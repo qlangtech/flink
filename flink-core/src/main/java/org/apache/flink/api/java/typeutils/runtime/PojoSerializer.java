@@ -229,9 +229,10 @@ public final class PojoSerializer<T> extends TypeSerializer<T> {
                 throw new RuntimeException("Cannot instantiate class.", t);
             }
             // no subclass
+            Field field = null;
             try {
                 for (int i = 0; i < numFields; i++) {
-                    if (fields[i] != null) {
+                    if ( (field =fields[i]) != null) {
                         Object value = fields[i].get(from);
                         if (value != null) {
                             Object copy = fieldSerializers[i].copy(value);
@@ -243,7 +244,9 @@ public final class PojoSerializer<T> extends TypeSerializer<T> {
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(
-                        "Error during POJO copy, this should not happen since we check the fields before.");
+                        "Error during POJO copy, this should not happen since we check the fields before. field:"
+                                + ((field != null) ? field.getName() : "none") + " numFields:"
+                                + numFields);
             }
             return target;
         } else {
