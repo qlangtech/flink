@@ -321,10 +321,10 @@ under the License.
 							<pattern>org.apache.calcite</pattern>
 							<shadedPattern>org.apache.flink.calcite.shaded.org.apache.calcite</shadedPattern>
 						</relocation>-->
-						<relocation>
-							<pattern>org.codehaus</pattern>
-							<shadedPattern>org.apache.flink.calcite.shaded.org.codehaus</shadedPattern>
-						</relocation>
+<!--						<relocation>-->
+<!--							<pattern>org.codehaus</pattern>-->
+<!--							<shadedPattern>org.apache.flink.calcite.shaded.org.codehaus</shadedPattern>-->
+<!--						</relocation>-->
 
 
 						<!-- Calcite's dependencies -->
@@ -364,18 +364,18 @@ under the License.
 							<shadedPattern>org.apache.flink.table.shaded.com.ibm.icu</shadedPattern>
 						</relocation>
 					</relocations>
-					<transformers>
-						<transformer
-							implementation="org.apache.maven.plugins.shade.resource.properties.PropertiesTransformer">
-							<!-- required configuration -->
-							<resource>org.codehaus.commons.compiler.properties</resource>
-							<ordinalKey>ordinal</ordinalKey>
-							<!-- optional configuration -->
-							<alreadyMergedKey>already_merged</alreadyMergedKey>
-							<defaultOrdinal>0</defaultOrdinal>
-							<reverseOrder>false</reverseOrder>
-						</transformer>
-					</transformers>
+<!--					<transformers>-->
+<!--						<transformer-->
+<!--							implementation="org.apache.maven.plugins.shade.resource.properties.PropertiesTransformer">-->
+<!--							&lt;!&ndash; required configuration &ndash;&gt;-->
+<!--							<resource>org.codehaus.commons.compiler.properties</resource>-->
+<!--							<ordinalKey>ordinal</ordinalKey>-->
+<!--							&lt;!&ndash; optional configuration &ndash;&gt;-->
+<!--							<alreadyMergedKey>already_merged</alreadyMergedKey>-->
+<!--							<defaultOrdinal>0</defaultOrdinal>-->
+<!--							<reverseOrder>false</reverseOrder>-->
+<!--						</transformer>-->
+<!--					</transformers>-->
 				</configuration>
 			</plugin>
 

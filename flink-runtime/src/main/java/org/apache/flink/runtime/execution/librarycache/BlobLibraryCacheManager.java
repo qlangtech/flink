@@ -145,7 +145,7 @@ public class BlobLibraryCacheManager implements LibraryCacheManager {
     }
 
     // baisui modfiy
-    public  static final class DefaultClassLoaderFactory implements ClassLoaderFactory {
+    public static class DefaultClassLoaderFactory implements ClassLoaderFactory {
 
         /** The resolve order to use when creating a {@link ClassLoader}. */
         protected final FlinkUserCodeClassLoaders.ResolveOrder classLoaderResolveOrder;

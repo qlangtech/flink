@@ -27,6 +27,7 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,7 @@ public class FlinkKubeClientFactory {
     public static FlinkKubeClientFactory getInstance() {
         return INSTANCE;
     }
+
     public static Config kubeConfig;
 
     /**
@@ -52,9 +54,10 @@ public class FlinkKubeClientFactory {
      *
      * @param flinkConfig Flink configuration
      * @param useCase Flink Kubernetes client use case (e.g. client, resourcemanager,
-     *     kubernetes-ha-services)
+     *         kubernetes-ha-services)
+     *
      * @return Return the Flink Kubernetes client with the specified configuration and dedicated IO
-     *     executor.
+     *         executor.
      */
     public FlinkKubeClient fromConfiguration(Configuration flinkConfig, String useCase) {
         final Config config;
@@ -66,11 +69,13 @@ public class FlinkKubeClientFactory {
 
         final String kubeConfigFile =
                 flinkConfig.getString(KubernetesConfigOptions.KUBE_CONFIG_FILE);
-         // baisui 20211104 modify for config inject form context
+        LOG.info(KubernetesConfigOptions.KUBE_CONFIG_FILE.key() + " path: {}.", kubeConfigFile);
+        // baisui 20211104 modify for config inject form context
         if (kubeConfig != null) {
+            LOG.info( "Trying to load kubernetes config from kubeConfig static" );
             config = kubeConfig;
-        }else  if (kubeConfigFile != null) {
-            LOG.debug("Trying to load kubernetes config from file: {}.", kubeConfigFile);
+        } else if (kubeConfigFile != null) {
+            LOG.info("Trying to load kubernetes config from file: {}.", kubeConfigFile);
             try {
                 // If kubeContext is null, the default context in the kubeConfigFile will be used.
                 // Note: the third parameter kubeconfigPath is optional and is set to null. It is
@@ -87,9 +92,11 @@ public class FlinkKubeClientFactory {
                 throw new KubernetesClientException("Load kubernetes config failed.", e);
             }
         } else {
-            LOG.debug("Trying to load default kubernetes config.");
-
-            config = Config.autoConfigure(kubeContext);
+            throw new UnsupportedOperationException(
+                    "Trying to load default kubernetes config is not support .");
+//            LOG.debug("Trying to load default kubernetes config.");
+//
+//            config = Config.autoConfigure(kubeContext);
         }
 
         final String namespace = flinkConfig.getString(KubernetesConfigOptions.NAMESPACE);
@@ -97,7 +104,7 @@ public class FlinkKubeClientFactory {
                 flinkConfig.getString(KubernetesConfigOptions.KUBERNETES_CLIENT_USER_AGENT);
         config.setNamespace(namespace);
         config.setUserAgent(userAgent);
-        LOG.debug("Setting Kubernetes client namespace: {}, userAgent: {}", namespace, userAgent);
+        LOG.info("Setting Kubernetes client namespace: {}, userAgent: {}", namespace, userAgent);
 
         final NamespacedKubernetesClient client =
                 new KubernetesClientBuilder()

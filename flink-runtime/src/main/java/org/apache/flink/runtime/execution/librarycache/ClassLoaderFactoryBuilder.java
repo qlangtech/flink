@@ -37,7 +37,7 @@ public interface ClassLoaderFactoryBuilder {
             String[] alwaysParentFirstPatterns,
             @Nullable Consumer<Throwable> exceptionHander,
             boolean checkClassLoaderLeak){
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(this.getClass().getName());
     }
 
     public default ClassLoaderFactory buildClientLoaderFactory(
@@ -45,6 +45,6 @@ public interface ClassLoaderFactoryBuilder {
             String[] alwaysParentFirstPatterns,
             @Nullable Consumer<Throwable> exceptionHander,
             boolean checkClassLoaderLeak){
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(this.getClass().getName());
     }
 }

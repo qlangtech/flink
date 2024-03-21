@@ -10,6 +10,7 @@ mvn compile deploy -Pscala-${scala_version} -Dfast  -DskipTests=true -Ptis-repo 
 ,flink-table/flink-table-runtime\
 ,flink-test-utils-parent/flink-test-utils\
 ,flink-test-utils-parent/flink-connector-test-utils\
+,flink-formats/flink-avro-confluent-registry\
 ,flink-core\
 ,flink-streaming-java\
 ,flink-table/flink-table-common\
