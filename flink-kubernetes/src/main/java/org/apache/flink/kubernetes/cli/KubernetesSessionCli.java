@@ -37,6 +37,7 @@ import org.apache.flink.kubernetes.executors.KubernetesSessionClusterExecutor;
 import org.apache.flink.kubernetes.kubeclient.FlinkKubeClient;
 import org.apache.flink.kubernetes.kubeclient.FlinkKubeClientFactory;
 import org.apache.flink.kubernetes.kubeclient.decorators.ExternalServiceDecorator;
+import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService;
 import org.apache.flink.runtime.security.SecurityUtils;
 import org.apache.flink.util.FlinkException;
 
@@ -48,7 +49,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.function.Consumer;
+import java.util.Optional;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
 
@@ -107,14 +108,20 @@ public class KubernetesSessionCli {
 
     // baisui modify make it public
     public String run(String[] args) throws FlinkException, CliArgsException {
-        return run(args, (clientConsumer) -> {
+        return run(args, (clientConsumer, svc) -> {
         });
+    }
+
+    public interface ClusterClientConsumer {
+        void accept(
+                ClusterClient<String> clusterClient,
+                Optional<KubernetesService> externalService);
     }
 
 
     public String run(
             String[] args,
-            Consumer<ClusterClient<String>> clusterClientConsumer) throws FlinkException, CliArgsException {
+            ClusterClientConsumer clusterClientConsumer) throws FlinkException, CliArgsException {
 
         final Configuration configuration = getEffectiveConfiguration(args);
 
@@ -132,10 +139,11 @@ public class KubernetesSessionCli {
                     FlinkKubeClientFactory.getInstance().fromConfiguration(configuration, "client");
 
             // Retrieve or create a session cluster.
+            Optional<KubernetesService> externalService = Optional.empty();
             if (clusterId != null
-                    && kubeClient
-                            .getService(ExternalServiceDecorator.getExternalServiceName(clusterId))
-                            .isPresent()) {
+                    && (externalService = kubeClient
+                    .getService(ExternalServiceDecorator.getExternalServiceName(clusterId)))
+                    .isPresent()) {
                 clusterClient = kubernetesClusterDescriptor.retrieve(clusterId).getClusterClient();
             } else {
                 clusterClient =
@@ -147,7 +155,7 @@ public class KubernetesSessionCli {
                 clusterId = clusterClient.getClusterId();
             }
             // baisui add for process clusterClient
-            clusterClientConsumer.accept(clusterClient);
+            clusterClientConsumer.accept(clusterClient, externalService);
 
             try {
                 if (!detached) {
@@ -170,7 +178,7 @@ public class KubernetesSessionCli {
             } catch (Exception e) {
                 LOG.info("Could not properly shutdown cluster client.", e);
             }
-          return   clusterId;
+            return clusterId;
         } finally {
             try {
                 kubernetesClusterDescriptor.close();
@@ -179,13 +187,14 @@ public class KubernetesSessionCli {
             }
         }
 
-      //  return 0;
+        //  return 0;
     }
 
     /**
      * Check whether need to continue or kill the cluster.
      *
      * @param in input buffer reader
+     *
      * @return f0, whether need to continue read from input. f1, whether need to kill the cluster.
      */
     private Tuple2<Boolean, Boolean> repStep(BufferedReader in)
