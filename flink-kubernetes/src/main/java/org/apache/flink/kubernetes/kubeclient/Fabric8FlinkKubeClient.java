@@ -50,6 +50,7 @@ import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,10 +174,18 @@ public class Fabric8FlinkKubeClient implements FlinkKubeClient {
                 kubeClientExecutorService);
     }
 
+    public static final String TIS_K8S_ENV = "TIS_K8S_ENV";
     @Override
-    public Optional<Endpoint> getRestEndpoint(String clusterId) {
-        Optional<KubernetesService> restService =
-                getService(ExternalServiceDecorator.getExternalServiceName(clusterId));
+    public Optional<Endpoint> getRestEndpoint(String clusterId,boolean envAware) {
+        String externalServiceName = ExternalServiceDecorator.getExternalServiceName(
+                clusterId + ExternalServiceDecorator.TIS_EXTERNAL_SERVICE_SUFFIX);
+        if (envAware) {
+            if (!Boolean.parseBoolean(System.getenv(TIS_K8S_ENV))) {
+                externalServiceName = ExternalServiceDecorator.getExternalServiceName(clusterId);
+            }
+        }
+
+        Optional<KubernetesService> restService = getService(externalServiceName);
         if (!restService.isPresent()) {
             return Optional.empty();
         }

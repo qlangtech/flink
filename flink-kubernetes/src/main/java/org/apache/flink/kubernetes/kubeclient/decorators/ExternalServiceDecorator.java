@@ -25,19 +25,27 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Service;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
 
 /** Creates an external Service to expose the rest port of the Flink JobManager(s). */
 public class ExternalServiceDecorator extends AbstractKubernetesStepDecorator {
-
+public static final String TIS_EXTERNAL_SERVICE_SUFFIX = "-tis";
     private final KubernetesJobManagerParameters kubernetesJobManagerParameters;
 
     public ExternalServiceDecorator(KubernetesJobManagerParameters kubernetesJobManagerParameters) {
         this.kubernetesJobManagerParameters = checkNotNull(kubernetesJobManagerParameters);
     }
+
+    /**
+     * TIS 需要添加自有的Service以满足需求
+     */
+    public static Function<KubernetesJobManagerParameters,Service> externalServiceSuppler;
 
     @Override
     public List<HasMetadata> buildAccompanyingKubernetesResources() throws IOException {
@@ -46,8 +54,12 @@ public class ExternalServiceDecorator extends AbstractKubernetesStepDecorator {
                         .getRestServiceExposedType()
                         .serviceType()
                         .buildUpExternalRestService(kubernetesJobManagerParameters);
-
-        return Collections.singletonList(service);
+        List<HasMetadata> svcs = new ArrayList<>();
+        svcs.add(service);
+        if (externalServiceSuppler != null) {
+            svcs.add(Objects.requireNonNull(externalServiceSuppler.apply(kubernetesJobManagerParameters),"externalServiceSuppler result can not be null"));
+        }
+        return svcs; //Collections.singletonList(service);
     }
 
     /** Generate name of the external rest Service. */

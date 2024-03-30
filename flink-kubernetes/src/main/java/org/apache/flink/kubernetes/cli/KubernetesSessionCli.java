@@ -108,18 +108,20 @@ public class KubernetesSessionCli {
 
     // baisui modify make it public
     public String run(String[] args) throws FlinkException, CliArgsException {
-        return run(args, (clientConsumer, svc) -> {
+        return run(true, args, (clientConsumer, kubeClient, svc) -> {
         });
     }
 
     public interface ClusterClientConsumer {
         void accept(
                 ClusterClient<String> clusterClient,
+                FlinkKubeClient kubeClient,
                 Optional<KubernetesService> externalService);
     }
 
 
     public String run(
+            boolean existClusterFetch,
             String[] args,
             ClusterClientConsumer clusterClientConsumer) throws FlinkException, CliArgsException {
 
@@ -140,7 +142,7 @@ public class KubernetesSessionCli {
 
             // Retrieve or create a session cluster.
             Optional<KubernetesService> externalService = Optional.empty();
-            if (clusterId != null
+            if (existClusterFetch && clusterId != null
                     && (externalService = kubeClient
                     .getService(ExternalServiceDecorator.getExternalServiceName(clusterId)))
                     .isPresent()) {
@@ -155,7 +157,7 @@ public class KubernetesSessionCli {
                 clusterId = clusterClient.getClusterId();
             }
             // baisui add for process clusterClient
-            clusterClientConsumer.accept(clusterClient, externalService);
+            clusterClientConsumer.accept(clusterClient,kubeClient ,externalService);
 
             try {
                 if (!detached) {
