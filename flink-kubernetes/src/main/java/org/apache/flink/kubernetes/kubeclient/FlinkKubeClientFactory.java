@@ -92,11 +92,10 @@ public class FlinkKubeClientFactory {
                 throw new KubernetesClientException("Load kubernetes config failed.", e);
             }
         } else {
-            throw new UnsupportedOperationException(
-                    "Trying to load default kubernetes config is not support .");
-//            LOG.debug("Trying to load default kubernetes config.");
-//
-//            config = Config.autoConfigure(kubeContext);
+//            throw new UnsupportedOperationException(
+//                    "Trying to load default kubernetes config is not support .");
+            LOG.debug("Trying to load default kubernetes config.");
+            config = Config.autoConfigure(kubeContext);
         }
 
         final String namespace = flinkConfig.getString(KubernetesConfigOptions.NAMESPACE);
