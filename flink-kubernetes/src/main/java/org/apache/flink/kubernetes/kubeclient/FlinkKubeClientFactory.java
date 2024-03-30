@@ -94,7 +94,7 @@ public class FlinkKubeClientFactory {
         } else {
 //            throw new UnsupportedOperationException(
 //                    "Trying to load default kubernetes config is not support .");
-            LOG.debug("Trying to load default kubernetes config.");
+            LOG.info("Trying to load default kubernetes config.");
             config = Config.autoConfigure(kubeContext);
         }
 
