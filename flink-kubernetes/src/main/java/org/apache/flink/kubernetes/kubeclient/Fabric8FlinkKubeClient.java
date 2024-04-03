@@ -185,22 +185,35 @@ public class Fabric8FlinkKubeClient implements FlinkKubeClient {
                 externalServiceName = ExternalServiceDecorator.getExternalServiceName(clusterId);
             }
         }
+        Optional<Endpoint> endpoint = Optional.empty();
+        int tryCount = 0;
+        while (tryCount++<6 && !endpoint.isPresent()) {
+            // 可能由于使用了loadbalance，还没有来得及分配external ip 就已经调用此方法了，会返回nodeip，所以需要多尝试几次
+            Optional<KubernetesService> restService = getService(externalServiceName);
+            if (!restService.isPresent()) {
+                return Optional.empty();
+            }
+            final Service service = restService.get().getInternalResource();
 
-        Optional<KubernetesService> restService = getService(externalServiceName);
-        if (!restService.isPresent()) {
-            return Optional.empty();
+            final KubernetesConfigOptions.ServiceExposedType serviceExposedType =
+                    ServiceType.classify(service);
+            endpoint = serviceExposedType
+                    .serviceType()
+                    .getRestEndpoint(service, internalClient, nodePortAddressType);
+
+            LOG.info("tryCount:{},externalServiceName:{},service type:{},endpoint:{}", tryCount
+                    , externalServiceName, serviceExposedType, endpoint.map((e) -> String.valueOf(
+                            e.getAddress() + ":" + e.getPort())).orElse("empty"));
+            if (endpoint.isPresent()) {
+                return endpoint;
+            }else{
+                try {
+                    Thread.sleep(3000);
+                } catch (Throwable e) {
+
+                }
+            }
         }
-        final Service service = restService.get().getInternalResource();
-
-        final KubernetesConfigOptions.ServiceExposedType serviceExposedType =
-                ServiceType.classify(service);
-        Optional<Endpoint> endpoint = serviceExposedType
-                .serviceType()
-                .getRestEndpoint(service, internalClient, nodePortAddressType);
-
-        LOG.info("externalServiceName:{},service type:{},endpoint:{}"
-                , externalServiceName, serviceExposedType, endpoint.map((e) -> String.valueOf(
-                        e.getAddress() + ":" + e.getPort())).orElse("empty"));
         return endpoint;
     }
 

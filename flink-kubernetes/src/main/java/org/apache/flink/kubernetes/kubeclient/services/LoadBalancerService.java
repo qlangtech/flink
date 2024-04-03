@@ -99,28 +99,30 @@ public class LoadBalancerService extends ServiceType {
         } else {
             // Use node port. Node port is accessible on any node within kubernetes cluster. We'll
             // only consider IPs with the configured address type.
-            address =
-                    internalClient.nodes().list().getItems().stream()
-                            .filter(
-                                    node ->
-                                            node.getSpec().getUnschedulable() == null
-                                                    || !node.getSpec().getUnschedulable())
-                            .flatMap(node -> node.getStatus().getAddresses().stream())
-                            .filter(
-                                    nodeAddress ->
-                                            nodePortAddressType
-                                                    .name()
-                                                    .equals(nodeAddress.getType()))
-                            .map(NodeAddress::getAddress)
-                            .filter(ip -> !ip.isEmpty())
-                            .findAny()
-                            .orElse(null);
-            if (address == null) {
-                LOG.warn(
-                        "Unable to find any node ip with type [{}]. Please see [{}] config option for more details.",
-                        nodePortAddressType,
-                        KubernetesConfigOptions.REST_SERVICE_EXPOSED_NODE_PORT_ADDRESS_TYPE.key());
-            }
+//            address =
+//                    internalClient.nodes().list().getItems().stream()
+//                            .filter(
+//                                    node ->
+//                                            node.getSpec().getUnschedulable() == null
+//                                                    || !node.getSpec().getUnschedulable())
+//                            .flatMap(node -> node.getStatus().getAddresses().stream())
+//                            .filter(
+//                                    nodeAddress ->
+//                                            nodePortAddressType
+//                                                    .name()
+//                                                    .equals(nodeAddress.getType()))
+//                            .map(NodeAddress::getAddress)
+//                            .filter(ip -> !ip.isEmpty())
+//                            .findAny()
+//                            .orElse(null);
+//            if (address == null) {
+//                LOG.warn(
+//                        "Unable to find any node ip with type [{}]. Please see [{}] config option for more details.",
+//                        nodePortAddressType,
+//                        KubernetesConfigOptions.REST_SERVICE_EXPOSED_NODE_PORT_ADDRESS_TYPE.key());
+//            }
+            // 不能直接使用集群node
+            return Optional.empty();
         }
         boolean noAddress = address == null || address.isEmpty();
         return noAddress ? Optional.empty() : Optional.of(new Endpoint(address, restPort));
