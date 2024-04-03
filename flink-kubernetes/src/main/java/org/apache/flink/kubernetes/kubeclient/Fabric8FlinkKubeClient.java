@@ -175,8 +175,9 @@ public class Fabric8FlinkKubeClient implements FlinkKubeClient {
     }
 
     public static final String TIS_K8S_ENV = "TIS_K8S_ENV";
+
     @Override
-    public Optional<Endpoint> getRestEndpoint(String clusterId,boolean envAware) {
+    public Optional<Endpoint> getRestEndpoint(String clusterId, boolean envAware) {
         String externalServiceName = ExternalServiceDecorator.getExternalServiceName(
                 clusterId + ExternalServiceDecorator.TIS_EXTERNAL_SERVICE_SUFFIX);
         if (envAware) {
@@ -193,10 +194,14 @@ public class Fabric8FlinkKubeClient implements FlinkKubeClient {
 
         final KubernetesConfigOptions.ServiceExposedType serviceExposedType =
                 ServiceType.classify(service);
-
-        return serviceExposedType
+        Optional<Endpoint> endpoint = serviceExposedType
                 .serviceType()
                 .getRestEndpoint(service, internalClient, nodePortAddressType);
+
+        LOG.info("externalServiceName:{},service type:{},endpoint:{}"
+                , externalServiceName, serviceExposedType, endpoint.map((e) -> String.valueOf(
+                        e.getAddress() + ":" + e.getPort())).orElse("empty"));
+        return endpoint;
     }
 
     @Override
@@ -243,24 +248,24 @@ public class Fabric8FlinkKubeClient implements FlinkKubeClient {
             Map<String, String> labels, WatchCallbackHandler<KubernetesPod> podCallbackHandler)
             throws Exception {
         return FutureUtils.retry(
-                        () ->
-                                CompletableFuture.supplyAsync(
-                                        () ->
-                                                new KubernetesWatch(
-                                                        this.internalClient
-                                                                .pods()
-                                                                .withLabels(labels)
-                                                                .withResourceVersion(
-                                                                        KUBERNETES_ZERO_RESOURCE_VERSION)
-                                                                .watch(
-                                                                        new KubernetesPodsWatcher(
-                                                                                podCallbackHandler))),
-                                        kubeClientExecutorService),
-                        maxRetryAttempts,
-                        t ->
-                                ExceptionUtils.findThrowable(t, KubernetesClientException.class)
-                                        .isPresent(),
-                        kubeClientExecutorService)
+                () ->
+                        CompletableFuture.supplyAsync(
+                                () ->
+                                        new KubernetesWatch(
+                                                this.internalClient
+                                                        .pods()
+                                                        .withLabels(labels)
+                                                        .withResourceVersion(
+                                                                KUBERNETES_ZERO_RESOURCE_VERSION)
+                                                        .watch(
+                                                                new KubernetesPodsWatcher(
+                                                                        podCallbackHandler))),
+                                kubeClientExecutorService),
+                maxRetryAttempts,
+                t ->
+                        ExceptionUtils.findThrowable(t, KubernetesClientException.class)
+                                .isPresent(),
+                kubeClientExecutorService)
                 .get();
     }
 
@@ -276,11 +281,11 @@ public class Fabric8FlinkKubeClient implements FlinkKubeClient {
     public CompletableFuture<Void> createConfigMap(KubernetesConfigMap configMap) {
         final String configMapName = configMap.getName();
         return CompletableFuture.runAsync(
-                        () ->
-                                this.internalClient
-                                        .resource(configMap.getInternalResource())
-                                        .create(),
-                        kubeClientExecutorService)
+                () ->
+                        this.internalClient
+                                .resource(configMap.getInternalResource())
+                                .create(),
+                kubeClientExecutorService)
                 .exceptionally(
                         throwable -> {
                             throw new CompletionException(
@@ -391,7 +396,7 @@ public class Fabric8FlinkKubeClient implements FlinkKubeClient {
                                         service -> {
                                             final Service updatedService =
                                                     new ServiceBuilder(
-                                                                    service.getInternalResource())
+                                                            service.getInternalResource())
                                                             .editSpec()
                                                             .editMatchingPort(
                                                                     servicePortBuilder ->
