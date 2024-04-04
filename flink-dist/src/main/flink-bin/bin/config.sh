@@ -47,7 +47,7 @@ constructFlinkClassPath() {
     echo "$FLINK_CLASSPATH""$FLINK_DIST"
 }
 
-# baisui add for 找到除flink开头的jar包，因为k8s application 模式下运行，在flink-dependency 包中都已经有flink相关的依赖了
+#  baisui add for 找到除flink开头的jar包，因为k8s application 模式下运行，在flink-dependency 包中都已经有flink相关的依赖了
 constructTISKubernetesApplicationFlinkClassPath() {
     local FLINK_CLASSPATH
     # 找到除flink开头的jar包
