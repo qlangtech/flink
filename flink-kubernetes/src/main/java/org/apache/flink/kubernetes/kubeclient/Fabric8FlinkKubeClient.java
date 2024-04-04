@@ -181,7 +181,7 @@ public class Fabric8FlinkKubeClient implements FlinkKubeClient {
         String externalServiceName = ExternalServiceDecorator.getExternalServiceName(
                 clusterId + ExternalServiceDecorator.TIS_EXTERNAL_SERVICE_SUFFIX);
         if (envAware) {
-            if (!Boolean.parseBoolean(System.getenv(TIS_K8S_ENV))) {
+            if (Boolean.parseBoolean(System.getenv(TIS_K8S_ENV))) {
                 externalServiceName = ExternalServiceDecorator.getExternalServiceName(clusterId);
             }
         }
