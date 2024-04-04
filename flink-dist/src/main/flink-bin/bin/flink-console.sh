@@ -28,7 +28,7 @@ bin=`dirname "$0"`
 bin=`cd "$bin"; pwd`
 
 . "$bin"/config.sh
-
+FLINK_TM_CLASSPATH=`constructFlinkClassPath`
 case $SERVICE in
     (taskexecutor)
         CLASS_TO_RUN=org.apache.flink.runtime.taskexecutor.TaskManagerRunner
@@ -56,6 +56,7 @@ case $SERVICE in
 
     (kubernetes-application)
         # baisui modify for tis entrypoint 2024/01/09
+        FLINK_TM_CLASSPATH=`constructTISKubernetesApplicationFlinkClassPath`
         CLASS_TO_RUN=org.apache.flink.kubernetes.entrypoint.KubernetesApplicationClusterEntrypointOfTIS
     ;;
 
@@ -74,7 +75,7 @@ case $SERVICE in
     ;;
 esac
 
-FLINK_TM_CLASSPATH=`constructFlinkClassPath`
+
 
 if [ "$FLINK_IDENT_STRING" = "" ]; then
     FLINK_IDENT_STRING="$USER"

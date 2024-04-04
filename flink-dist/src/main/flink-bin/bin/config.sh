@@ -47,6 +47,21 @@ constructFlinkClassPath() {
     echo "$FLINK_CLASSPATH""$FLINK_DIST"
 }
 
+# baisui add for 找到除flink开头的jar包，因为k8s application 模式下运行，在flink-dependency 包中都已经有flink相关的依赖了
+constructTISKubernetesApplicationFlinkClassPath() {
+    local FLINK_CLASSPATH
+    # 找到除flink开头的jar包
+    while read -d '' -r jarfile ; do
+        if [[ "$FLINK_CLASSPATH" == "" ]]; then
+            FLINK_CLASSPATH="$jarfile";
+        else
+            FLINK_CLASSPATH="$FLINK_CLASSPATH":"$jarfile"
+        fi
+    done < <(find "$FLINK_LIB_DIR" ! -type d ! -name 'flink-*.jar' -print0 | sort -z)
+
+    echo "$FLINK_CLASSPATH"
+}
+
 findFlinkDistJar() {
     local FLINK_DIST
     FLINK_DIST="$(find "$FLINK_LIB_DIR" -name 'flink-dist*.jar')"
