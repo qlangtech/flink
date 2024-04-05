@@ -56,7 +56,7 @@ case $SERVICE in
 
     (kubernetes-application)
         # baisui modify for tis entrypoint 2024/01/09
-         FLINK_TM_CLASSPATH=`constructTISKubernetesApplicationFlinkClassPath`
+        # FLINK_TM_CLASSPATH=`constructTISKubernetesApplicationFlinkClassPath`
         CLASS_TO_RUN=org.apache.flink.kubernetes.entrypoint.KubernetesApplicationClusterEntrypointOfTIS
     ;;
 
