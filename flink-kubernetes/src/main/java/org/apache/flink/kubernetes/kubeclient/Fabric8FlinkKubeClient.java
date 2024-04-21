@@ -18,6 +18,8 @@
 
 package org.apache.flink.kubernetes.kubeclient;
 
+import com.qlangtech.tis.config.BasicConfig;
+
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 import org.apache.flink.kubernetes.configuration.KubernetesLeaderElectionConfiguration;
@@ -174,14 +176,16 @@ public class Fabric8FlinkKubeClient implements FlinkKubeClient {
                 kubeClientExecutorService);
     }
 
-    public static final String TIS_K8S_ENV = "TIS_K8S_ENV";
+
 
     @Override
     public Optional<Endpoint> getRestEndpoint(String clusterId, boolean envAware) {
         String externalServiceName = ExternalServiceDecorator.getExternalServiceName(
                 clusterId + ExternalServiceDecorator.TIS_EXTERNAL_SERVICE_SUFFIX);
         if (envAware) {
-            if (Boolean.parseBoolean(System.getenv(TIS_K8S_ENV))) {
+
+         //   if (Boolean.parseBoolean(System.getenv(BasicConfig.TIS_K8S_ENV))) {
+            if(BasicConfig.inDockerContainer()){
                 externalServiceName = ExternalServiceDecorator.getExternalServiceName(clusterId);
             }
         }
