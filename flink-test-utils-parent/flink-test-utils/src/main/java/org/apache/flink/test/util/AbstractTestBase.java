@@ -61,7 +61,7 @@ public abstract class AbstractTestBase extends TestLogger {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTestBase.class);
 
-    private static final int DEFAULT_PARALLELISM = 4;
+    private static final int DEFAULT_PARALLELISM = 1;
 
     @ClassRule
     public static final MiniClusterWithClientResource MINI_CLUSTER_RESOURCE =
