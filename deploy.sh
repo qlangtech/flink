@@ -3,7 +3,7 @@
 #mvn compile install -Dfast -Dscala-2.12 -DskipTests=true -DaltDeploymentRepository=base::default::http://localhost:8080/release
 scala_version=2.12
 
-mvn compile deploy -Pscala-${scala_version} -Dfast  -DskipTests=true -Ptis-repo -Pdocs-and-source -Dcheckstyle.skip  \
+mvn compile deploy -Pscala-${scala_version} -Pjava11 -Dfast  -DskipTests=true -Ptis-repo -Pdocs-and-source -Dcheckstyle.skip  \
 -pl flink-dist,flink-kubernetes\
 ,flink-formats/flink-json\
 ,flink-table/flink-table-planner\

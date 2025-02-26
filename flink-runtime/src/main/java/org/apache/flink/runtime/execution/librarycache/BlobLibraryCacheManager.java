@@ -90,7 +90,8 @@ public class BlobLibraryCacheManager implements LibraryCacheManager {
             boolean wrapsSystemClassLoader) {
         this.blobService = checkNotNull(blobService);
         this.classLoaderFactory = checkNotNull(classLoaderFactory);
-        this.wrapsSystemClassLoader = wrapsSystemClassLoader;
+        // baisui 修改，必须启用classLoaderFactory 来创建classloader
+        this.wrapsSystemClassLoader = false && wrapsSystemClassLoader;
     }
 
     @Override
@@ -106,6 +107,7 @@ public class BlobLibraryCacheManager implements LibraryCacheManager {
      * Gets the number of tasks holding {@link ClassLoader} references for the given job.
      *
      * @param jobId ID of a job
+     *
      * @return number of reference holders
      */
     int getNumberOfReferenceHolders(JobID jobId) {
@@ -197,22 +199,21 @@ public class BlobLibraryCacheManager implements LibraryCacheManager {
             @Nullable FatalErrorHandler fatalErrorHandlerJvmMetaspaceOomError,
             boolean checkClassLoaderLeak) {
 
-           // baisui modify for serverSide classloader extension
-            Consumer<Throwable> exceptionHandler = createClassLoadingExceptionHandler(
-                                fatalErrorHandlerJvmMetaspaceOomError);
-                ServiceLoader<ClassLoaderFactoryBuilder> classLoaderService = ServiceLoader.load(
-                                ClassLoaderFactoryBuilder.class);
-                Iterator<ClassLoaderFactoryBuilder> factoryIt = classLoaderService.iterator();
-                ClassLoaderFactoryBuilder factory = null;
-                while (factoryIt.hasNext()) {
-                        factory = factoryIt.next();
-                        return factory.buildServerLoaderFactory(
-                                        classLoaderResolveOrder,
-                                        alwaysParentFirstPatterns,
-                                        exceptionHandler,
-                                        checkClassLoaderLeak);
-            }
-
+        // baisui modify for serverSide classloader extension
+        Consumer<Throwable> exceptionHandler = createClassLoadingExceptionHandler(
+                fatalErrorHandlerJvmMetaspaceOomError);
+        ServiceLoader<ClassLoaderFactoryBuilder> classLoaderService = ServiceLoader.load(
+                ClassLoaderFactoryBuilder.class);
+        Iterator<ClassLoaderFactoryBuilder> factoryIt = classLoaderService.iterator();
+        ClassLoaderFactoryBuilder factory = null;
+        while (factoryIt.hasNext()) {
+            factory = factoryIt.next();
+            return factory.buildServerLoaderFactory(
+                    classLoaderResolveOrder,
+                    alwaysParentFirstPatterns,
+                    exceptionHandler,
+                    checkClassLoaderLeak);
+        }
 
 
         return new DefaultClassLoaderFactory(
@@ -226,10 +227,10 @@ public class BlobLibraryCacheManager implements LibraryCacheManager {
             @Nullable FatalErrorHandler fatalErrorHandlerJvmMetaspaceOomError) {
         return fatalErrorHandlerJvmMetaspaceOomError != null
                 ? classLoadingException -> {
-                    if (ExceptionUtils.isMetaspaceOutOfMemoryError(classLoadingException)) {
-                        fatalErrorHandlerJvmMetaspaceOomError.onFatalError(classLoadingException);
-                    }
-                }
+            if (ExceptionUtils.isMetaspaceOutOfMemoryError(classLoadingException)) {
+                fatalErrorHandlerJvmMetaspaceOomError.onFatalError(classLoadingException);
+            }
+        }
                 : FlinkUserCodeClassLoader.NOOP_EXCEPTION_HANDLER;
     }
 
@@ -269,7 +270,7 @@ public class BlobLibraryCacheManager implements LibraryCacheManager {
                                     systemClassLoader
                                             ? ClassLoader.getSystemClassLoader()
                                             : createUserCodeClassLoader(
-                                                    jobId, libraries, classPaths),
+                                            jobId, libraries, classPaths),
                                     libraries,
                                     classPaths,
                                     systemClassLoader);
@@ -473,9 +474,9 @@ public class BlobLibraryCacheManager implements LibraryCacheManager {
             // lazy construction of a new set with String representations of the URLs
             if (classPaths.size() != requiredClassPaths.size()
                     || !requiredClassPaths.stream()
-                            .map(URL::toString)
-                            .collect(Collectors.toSet())
-                            .containsAll(classPaths)) {
+                    .map(URL::toString)
+                    .collect(Collectors.toSet())
+                    .containsAll(classPaths)) {
 
                 throw new IllegalStateException(
                         "The library registration references a different set of library BLOBs than"

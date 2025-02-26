@@ -27,6 +27,7 @@ import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironmentFactory;
 import org.apache.flink.test.util.MiniClusterPipelineExecutorServiceLoader;
+import org.apache.flink.test.util.TestEnvironment;
 
 import java.net.URL;
 import java.time.Duration;
@@ -56,7 +57,7 @@ public class TestStreamEnvironment extends StreamExecutionEnvironment {
                 new MiniClusterPipelineExecutorServiceLoader(miniCluster),
                 MiniClusterPipelineExecutorServiceLoader.updateConfigurationForMiniCluster(
                         config, jarFiles, classPaths),
-                null);
+                TestEnvironment.tisClassloader);
 
         setParallelism(parallelism);
     }
