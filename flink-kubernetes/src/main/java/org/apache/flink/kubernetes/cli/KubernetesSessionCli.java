@@ -118,7 +118,7 @@ public class KubernetesSessionCli {
                 Optional<KubernetesService> externalService);
     }
 
-    private String run(boolean existClusterFetch,
+    public String run(boolean existClusterFetch,
                     String[] args,
                     ClusterClientConsumer clusterClientConsumer) throws FlinkException, CliArgsException {
         final Configuration configuration = getEffectiveConfiguration(args);
