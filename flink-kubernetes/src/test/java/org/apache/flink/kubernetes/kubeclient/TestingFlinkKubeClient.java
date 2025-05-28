@@ -149,6 +149,11 @@ public class TestingFlinkKubeClient implements FlinkKubeClient {
     }
 
     @Override
+    public Optional<Endpoint> getRestEndpoint(String clusterId, boolean envAware) {
+        return Optional.empty();
+    }
+
+    @Override
     public List<KubernetesPod> getPodsWithLabels(Map<String, String> labels) {
         return getPodsWithLabelsFunction.apply(labels);
     }
