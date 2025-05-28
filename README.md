@@ -1,3 +1,13 @@
+# 开发分支维护方法
+1. 添加远端仓库地址： git remote add src_flink https://github.com/apache/flink-cdc.git
+   接下来可以用git remote 查看添加的远端仓库地址
+2. 拉取远端仓库中最新的tag： `git fetch src_flink tag release-1.20.1`
+3. 将新拉取到的tag，推送到本项目的远端仓库中去：`git push origin release-1.20.1`
+4. 同步刚拉取到的远端分支，创建本地分支：`git checkout -b release-1.20.1 tis-1.20.1`
+5. 查看旧版本分支修改内容 `git diff tis-1.18.1 release-1.18.1 --stat=1000 > diff-1.18.1.txt`
+6. 查看两个分支中指定文件路径的差异：`git diff release-1.18.1 tis-1.18.1 -- src/utils.js`
+7. 拷贝某个分支下的文件到当前分支下，例如：`git checkout tis-1.18.1 -- deploy.sh`
+
 # Apache Flink
 
 Apache Flink is an open source stream processing framework with powerful stream- and batch-processing capabilities.

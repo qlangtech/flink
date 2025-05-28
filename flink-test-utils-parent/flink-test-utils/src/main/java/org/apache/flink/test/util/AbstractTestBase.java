@@ -63,7 +63,7 @@ public abstract class AbstractTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTestBase.class);
 
-    private static final int DEFAULT_PARALLELISM = 4;
+    private static final int DEFAULT_PARALLELISM = 1;
 
     @RegisterExtension
     public static final MiniClusterExtension MINI_CLUSTER_EXTENSION =

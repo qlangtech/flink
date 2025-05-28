@@ -23,7 +23,7 @@ under the License.
 	<parent>
 		<groupId>org.apache.flink</groupId>
 		<artifactId>flink-parent</artifactId>
-		<version>1.20.1</version>
+		<version>tis-1.20.1</version>
 	</parent>
 
 	<artifactId>flink-kubernetes</artifactId>
@@ -39,6 +39,13 @@ under the License.
 	</properties>
 
 	<dependencies>
+		<!-- baisui add for Config BasicConfig.KEY_ENV_TIS_CFG_BUNDLE_PATH-->
+		<dependency>
+			<groupId>com.qlangtech.tis</groupId>
+			<artifactId>tis-config</artifactId>
+			<version>1.0.2</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- core dependencies  -->
 

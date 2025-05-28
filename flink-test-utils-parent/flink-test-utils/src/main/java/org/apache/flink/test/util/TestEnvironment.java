@@ -39,6 +39,16 @@ public class TestEnvironment extends ExecutionEnvironment {
 
     private TestEnvironment lastEnv;
 
+    /**
+     * 百岁（baisui）设置测试时设置uberClassLoader
+     */
+    public static ClassLoader tisClassloader;
+
+    public static void setCustomizeClassLoader(ClassLoader classloader) {
+        tisClassloader = classloader;
+    }
+
+
     public TestEnvironment(
             MiniCluster miniCluster,
             int parallelism,
@@ -49,7 +59,7 @@ public class TestEnvironment extends ExecutionEnvironment {
                 new MiniClusterPipelineExecutorServiceLoader(miniCluster),
                 MiniClusterPipelineExecutorServiceLoader.updateConfigurationForMiniCluster(
                         new Configuration(), jarFiles, classPaths),
-                null);
+                tisClassloader);
 
         this.miniCluster = Preconditions.checkNotNull(miniCluster);
 

@@ -65,40 +65,40 @@
 			<fileMode>0644</fileMode>
 		</file>
 
-		<file>
-			<source>../flink-filesystems/flink-s3-fs-hadoop/target/flink-s3-fs-hadoop-${project.version}.jar</source>
-			<outputDirectory>opt/</outputDirectory>
-			<destName>flink-s3-fs-hadoop-${project.version}.jar</destName>
-			<fileMode>0644</fileMode>
-		</file>
+<!--		<file>-->
+<!--			<source>../flink-filesystems/flink-s3-fs-hadoop/target/flink-s3-fs-hadoop-${project.version}.jar</source>-->
+<!--			<outputDirectory>opt/</outputDirectory>-->
+<!--			<destName>flink-s3-fs-hadoop-${project.version}.jar</destName>-->
+<!--			<fileMode>0644</fileMode>-->
+<!--		</file>-->
 
-		<file>
-			<source>../flink-filesystems/flink-s3-fs-presto/target/flink-s3-fs-presto-${project.version}.jar</source>
-			<outputDirectory>opt/</outputDirectory>
-			<destName>flink-s3-fs-presto-${project.version}.jar</destName>
-			<fileMode>0644</fileMode>
-		</file>
+<!--		<file>-->
+<!--			<source>../flink-filesystems/flink-s3-fs-presto/target/flink-s3-fs-presto-${project.version}.jar</source>-->
+<!--			<outputDirectory>opt/</outputDirectory>-->
+<!--			<destName>flink-s3-fs-presto-${project.version}.jar</destName>-->
+<!--			<fileMode>0644</fileMode>-->
+<!--		</file>-->
 
-		<file>
-			<source>../flink-filesystems/flink-oss-fs-hadoop/target/flink-oss-fs-hadoop-${project.version}.jar</source>
-			<outputDirectory>opt/</outputDirectory>
-			<destName>flink-oss-fs-hadoop-${project.version}.jar</destName>
-			<fileMode>0644</fileMode>
-		</file>
+<!--		<file>-->
+<!--			<source>../flink-filesystems/flink-oss-fs-hadoop/target/flink-oss-fs-hadoop-${project.version}.jar</source>-->
+<!--			<outputDirectory>opt/</outputDirectory>-->
+<!--			<destName>flink-oss-fs-hadoop-${project.version}.jar</destName>-->
+<!--			<fileMode>0644</fileMode>-->
+<!--		</file>-->
 
-		<file>
-			<source>../flink-filesystems/flink-azure-fs-hadoop/target/flink-azure-fs-hadoop-${project.version}.jar</source>
-			<outputDirectory>opt/</outputDirectory>
-			<destName>flink-azure-fs-hadoop-${project.version}.jar</destName>
-			<fileMode>0644</fileMode>
-		</file>
+<!--		<file>-->
+<!--			<source>../flink-filesystems/flink-azure-fs-hadoop/target/flink-azure-fs-hadoop-${project.version}.jar</source>-->
+<!--			<outputDirectory>opt/</outputDirectory>-->
+<!--			<destName>flink-azure-fs-hadoop-${project.version}.jar</destName>-->
+<!--			<fileMode>0644</fileMode>-->
+<!--		</file>-->
 
-		<file>
-			<source>../flink-filesystems/flink-gs-fs-hadoop/target/flink-gs-fs-hadoop-${project.version}.jar</source>
-			<outputDirectory>opt/</outputDirectory>
-			<destName>flink-gs-fs-hadoop-${project.version}.jar</destName>
-			<fileMode>0644</fileMode>
-		</file>
+<!--		<file>-->
+<!--			<source>../flink-filesystems/flink-gs-fs-hadoop/target/flink-gs-fs-hadoop-${project.version}.jar</source>-->
+<!--			<outputDirectory>opt/</outputDirectory>-->
+<!--			<destName>flink-gs-fs-hadoop-${project.version}.jar</destName>-->
+<!--			<fileMode>0644</fileMode>-->
+<!--		</file>-->
 
 		<!-- Queryable State -->
 		<file>
@@ -108,13 +108,13 @@
 			<fileMode>0644</fileMode>
 		</file>
 
-		<!-- Python -->
+		<!-- Python
 		<file>
 			<source>../flink-python/target/flink-python-${project.version}.jar</source>
 			<outputDirectory>opt</outputDirectory>
 			<destName>flink-python-${project.version}.jar</destName>
 			<fileMode>0644</fileMode>
-		</file>
+		</file>-->
 	</files>
 	<fileSets>
 		<fileSet>

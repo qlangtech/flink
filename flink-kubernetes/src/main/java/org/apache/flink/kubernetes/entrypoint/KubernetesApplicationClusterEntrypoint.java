@@ -59,111 +59,111 @@ public final class KubernetesApplicationClusterEntrypoint extends ApplicationClu
         super(configuration, program, KubernetesResourceManagerFactory.getInstance());
     }
 
-    public static void main(final String[] args) {
-        // startup checks and logging
-        EnvironmentInformation.logEnvironmentInfo(
-                LOG, KubernetesApplicationClusterEntrypoint.class.getSimpleName(), args);
-        SignalHandler.register(LOG);
-        JvmShutdownSafeguard.installAsShutdownHook(LOG);
-
-        final Configuration dynamicParameters =
-                ClusterEntrypointUtils.parseParametersOrExit(
-                        args,
-                        new DynamicParametersConfigurationParserFactory(),
-                        KubernetesApplicationClusterEntrypoint.class);
-        final Configuration configuration =
-                KubernetesEntrypointUtils.loadConfiguration(dynamicParameters);
-
-        PackagedProgram program = null;
-        try {
-            PluginManager pluginManager =
-                    PluginUtils.createPluginManagerFromRootFolder(configuration);
-            LOG.info(
-                    "Install default filesystem for fetching user artifacts in Kubernetes Application Mode.");
-            FileSystem.initialize(configuration, pluginManager);
-            SecurityContext securityContext = installSecurityContext(configuration);
-            program = securityContext.runSecured(() -> getPackagedProgram(configuration));
-        } catch (Exception e) {
-            LOG.error("Could not create application program.", e);
-            System.exit(1);
-        }
-
-        try {
-            configureExecution(configuration, program);
-        } catch (Exception e) {
-            LOG.error("Could not apply application configuration.", e);
-            System.exit(1);
-        }
-
-        final KubernetesApplicationClusterEntrypoint kubernetesApplicationClusterEntrypoint =
-                new KubernetesApplicationClusterEntrypoint(configuration, program);
-
-        ClusterEntrypoint.runClusterEntrypoint(kubernetesApplicationClusterEntrypoint);
-    }
-
-    private static PackagedProgram getPackagedProgram(final Configuration configuration)
-            throws FlinkException {
-
-        final ApplicationConfiguration applicationConfiguration =
-                ApplicationConfiguration.fromConfiguration(configuration);
-
-        final PackagedProgramRetriever programRetriever =
-                getPackagedProgramRetriever(
-                        configuration,
-                        applicationConfiguration.getProgramArguments(),
-                        applicationConfiguration.getApplicationClassName());
-        return programRetriever.getPackagedProgram();
-    }
-
-    private static PackagedProgramRetriever getPackagedProgramRetriever(
-            final Configuration configuration,
-            final String[] programArguments,
-            @Nullable final String jobClassName)
-            throws FlinkException {
-
-        final File userLibDir = ClusterEntrypointUtils.tryFindUserLibDirectory().orElse(null);
-
-        // No need to do pipelineJars validation if it is a PyFlink job.
-        if (!(PackagedProgramUtils.isPython(jobClassName)
-                || PackagedProgramUtils.isPython(programArguments))) {
-            final ArtifactFetchManager.Result fetchRes = fetchArtifacts(configuration);
-
-            return DefaultPackagedProgramRetriever.create(
-                    userLibDir,
-                    fetchRes.getJobJar(),
-                    fetchRes.getArtifacts(),
-                    jobClassName,
-                    programArguments,
-                    configuration);
-        }
-
-        return DefaultPackagedProgramRetriever.create(
-                userLibDir, jobClassName, programArguments, configuration);
-    }
-
-    private static ArtifactFetchManager.Result fetchArtifacts(Configuration configuration) {
-        try {
-            String targetDir = generateJarDir(configuration);
-            ArtifactFetchManager fetchMgr = new ArtifactFetchManager(configuration, targetDir);
-
-            List<String> uris = configuration.get(PipelineOptions.JARS);
-            checkArgument(uris.size() == 1, "Should only have one jar");
-            List<String> additionalUris =
-                    configuration
-                            .getOptional(ArtifactFetchOptions.ARTIFACT_LIST)
-                            .orElse(Collections.emptyList());
-
-            return fetchMgr.fetchArtifacts(uris.get(0), additionalUris);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static String generateJarDir(Configuration configuration) {
-        return String.join(
-                File.separator,
-                new File(configuration.get(ArtifactFetchOptions.BASE_DIR)).getAbsolutePath(),
-                configuration.get(KubernetesConfigOptions.NAMESPACE),
-                configuration.get(KubernetesConfigOptions.CLUSTER_ID));
-    }
+//    public static void main(final String[] args) {
+//        // startup checks and logging
+//        EnvironmentInformation.logEnvironmentInfo(
+//                LOG, KubernetesApplicationClusterEntrypoint.class.getSimpleName(), args);
+//        SignalHandler.register(LOG);
+//        JvmShutdownSafeguard.installAsShutdownHook(LOG);
+//
+//        final Configuration dynamicParameters =
+//                ClusterEntrypointUtils.parseParametersOrExit(
+//                        args,
+//                        new DynamicParametersConfigurationParserFactory(),
+//                        KubernetesApplicationClusterEntrypoint.class);
+//        final Configuration configuration =
+//                KubernetesEntrypointUtils.loadConfiguration(dynamicParameters);
+//
+//        PackagedProgram program = null;
+//        try {
+//            PluginManager pluginManager =
+//                    PluginUtils.createPluginManagerFromRootFolder(configuration);
+//            LOG.info(
+//                    "Install default filesystem for fetching user artifacts in Kubernetes Application Mode.");
+//            FileSystem.initialize(configuration, pluginManager);
+//            SecurityContext securityContext = installSecurityContext(configuration);
+//            program = securityContext.runSecured(() -> getPackagedProgram(configuration));
+//        } catch (Exception e) {
+//            LOG.error("Could not create application program.", e);
+//            System.exit(1);
+//        }
+//
+//        try {
+//            configureExecution(configuration, program);
+//        } catch (Exception e) {
+//            LOG.error("Could not apply application configuration.", e);
+//            System.exit(1);
+//        }
+//
+//        final KubernetesApplicationClusterEntrypoint kubernetesApplicationClusterEntrypoint =
+//                new KubernetesApplicationClusterEntrypoint(configuration, program);
+//
+//        ClusterEntrypoint.runClusterEntrypoint(kubernetesApplicationClusterEntrypoint);
+//    }
+//
+//    private static PackagedProgram getPackagedProgram(final Configuration configuration)
+//            throws FlinkException {
+//
+//        final ApplicationConfiguration applicationConfiguration =
+//                ApplicationConfiguration.fromConfiguration(configuration);
+//
+//        final PackagedProgramRetriever programRetriever =
+//                getPackagedProgramRetriever(
+//                        configuration,
+//                        applicationConfiguration.getProgramArguments(),
+//                        applicationConfiguration.getApplicationClassName());
+//        return programRetriever.getPackagedProgram();
+//    }
+//
+//    private static PackagedProgramRetriever getPackagedProgramRetriever(
+//            final Configuration configuration,
+//            final String[] programArguments,
+//            @Nullable final String jobClassName)
+//            throws FlinkException {
+//
+//        final File userLibDir = ClusterEntrypointUtils.tryFindUserLibDirectory().orElse(null);
+//
+//        // No need to do pipelineJars validation if it is a PyFlink job.
+//        if (!(PackagedProgramUtils.isPython(jobClassName)
+//                || PackagedProgramUtils.isPython(programArguments))) {
+//            final ArtifactFetchManager.Result fetchRes = fetchArtifacts(configuration);
+//
+//            return DefaultPackagedProgramRetriever.create(
+//                    userLibDir,
+//                    fetchRes.getJobJar(),
+//                    fetchRes.getArtifacts(),
+//                    jobClassName,
+//                    programArguments,
+//                    configuration);
+//        }
+//
+//        return DefaultPackagedProgramRetriever.create(
+//                userLibDir, jobClassName, programArguments, configuration);
+//    }
+//
+//    private static ArtifactFetchManager.Result fetchArtifacts(Configuration configuration) {
+//        try {
+//            String targetDir = generateJarDir(configuration);
+//            ArtifactFetchManager fetchMgr = new ArtifactFetchManager(configuration, targetDir);
+//
+//            List<String> uris = configuration.get(PipelineOptions.JARS);
+//            checkArgument(uris.size() == 1, "Should only have one jar");
+//            List<String> additionalUris =
+//                    configuration
+//                            .getOptional(ArtifactFetchOptions.ARTIFACT_LIST)
+//                            .orElse(Collections.emptyList());
+//
+//            return fetchMgr.fetchArtifacts(uris.get(0), additionalUris);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+//
+//    static String generateJarDir(Configuration configuration) {
+//        return String.join(
+//                File.separator,
+//                new File(configuration.get(ArtifactFetchOptions.BASE_DIR)).getAbsolutePath(),
+//                configuration.get(KubernetesConfigOptions.NAMESPACE),
+//                configuration.get(KubernetesConfigOptions.CLUSTER_ID));
+//    }
 }

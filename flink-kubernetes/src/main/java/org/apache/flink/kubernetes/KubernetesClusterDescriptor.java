@@ -73,6 +73,7 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
     private static final Logger LOG = LoggerFactory.getLogger(KubernetesClusterDescriptor.class);
 
     private static final String CLUSTER_DESCRIPTION = "Kubernetes cluster";
+    private static final String KEY_TIS = "OfTIS";
 
     private final Configuration flinkConfig;
 
@@ -218,9 +219,9 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
         // No need to do pipelineJars validation if it is a PyFlink job.
         if (!(PackagedProgramUtils.isPython(applicationConfiguration.getApplicationClassName())
                 || PackagedProgramUtils.isPython(applicationConfiguration.getProgramArguments()))) {
-            final List<URI> pipelineJars =
-                    KubernetesUtils.checkJarFileForApplicationMode(flinkConfig);
-            Preconditions.checkArgument(pipelineJars.size() == 1, "Should only have one jar");
+//            final List<URI> pipelineJars =
+//                    KubernetesUtils.checkJarFileForApplicationMode(flinkConfig);
+//            Preconditions.checkArgument(pipelineJars.size() == 1, "Should only have one jar");
         }
 
         try {
@@ -229,9 +230,12 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
             throw new ClusterDeploymentException(ex);
         }
 
+        // baisui modfiy for change the entrypoint 2024/01/08
+        final String tisK8SClusterEntrypoint =  KubernetesApplicationClusterEntrypoint.class.getName() + KEY_TIS;
+
         final ClusterClientProvider<String> clusterClientProvider =
                 deployClusterInternal(
-                        KubernetesApplicationClusterEntrypoint.class.getName(),
+                        tisK8SClusterEntrypoint,
                         clusterSpecification,
                         false);
 

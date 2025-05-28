@@ -81,14 +81,18 @@ public interface FlinkKubeClient extends AutoCloseable {
      */
     Optional<KubernetesService> getService(String serviceName);
 
+    default Optional<Endpoint> getRestEndpoint(String clusterId) {
+        return getRestEndpoint(clusterId, true);
+    }
+
     /**
-     * Get the rest endpoint for access outside cluster.
+     * @param clusterId
+     * @param envAware 是否需要关注环境，当TIS console节点部署在非k8s环境中，由于客户端有需要直接打开flink控制台的需求，运行时需要判断当前是否运行在k8s的环境中，如果是则返回内部clusterIp，如果否，则需要返回用户定义的服务地址
      *
-     * @param clusterId cluster id
-     * @return Return empty if the service does not exist or could not extract the Endpoint from the
-     *     service.
+     * @return
      */
-    Optional<Endpoint> getRestEndpoint(String clusterId);
+    Optional<Endpoint> getRestEndpoint(String clusterId, boolean envAware);
+
 
     /**
      * List the pods with specified labels.

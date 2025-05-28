@@ -46,7 +46,7 @@ public class FlinkKubeClientFactory {
     public static FlinkKubeClientFactory getInstance() {
         return INSTANCE;
     }
-
+    public static Config kubeConfig;
     @VisibleForTesting
     public NamespacedKubernetesClient createFabric8ioKubernetesClient(Configuration flinkConfig) {
         final Config config;
@@ -57,8 +57,16 @@ public class FlinkKubeClientFactory {
         }
 
         final String kubeConfigFile = flinkConfig.get(KubernetesConfigOptions.KUBE_CONFIG_FILE);
-        if (kubeConfigFile != null) {
-            LOG.debug("Trying to load kubernetes config from file: {}.", kubeConfigFile);
+//        if (kubeConfigFile != null) {
+//            LOG.debug("Trying to load kubernetes config from file: {}.", kubeConfigFile);
+        LOG.info(KubernetesConfigOptions.KUBE_CONFIG_FILE.key() + " path: {}.", kubeConfigFile);
+        // baisui 20211104 modify for config inject form context
+        if (kubeConfig != null) {
+            LOG.info("Trying to load kubernetes config from kubeConfig static");
+            config = kubeConfig;
+        } else if (kubeConfigFile != null) {
+            LOG.info("Trying to load kubernetes config from file: {}.", kubeConfigFile);
+
             try {
                 // If kubeContext is null, the default context in the kubeConfigFile will be used.
                 // Note: the third parameter kubeconfigPath is optional and is set to null. It is
@@ -75,7 +83,7 @@ public class FlinkKubeClientFactory {
                 throw new KubernetesClientException("Load kubernetes config failed.", e);
             }
         } else {
-            LOG.debug("Trying to load default kubernetes config.");
+            LOG.info("Trying to load default kubernetes config.");
 
             config = Config.autoConfigure(kubeContext);
         }
@@ -85,7 +93,7 @@ public class FlinkKubeClientFactory {
                 flinkConfig.get(KubernetesConfigOptions.KUBERNETES_CLIENT_USER_AGENT);
         config.setNamespace(namespace);
         config.setUserAgent(userAgent);
-        LOG.debug("Setting Kubernetes client namespace: {}, userAgent: {}", namespace, userAgent);
+        LOG.info("Setting Kubernetes client namespace: {}, userAgent: {}", namespace, userAgent);
 
         return new KubernetesClientBuilder()
                 .withConfig(config)

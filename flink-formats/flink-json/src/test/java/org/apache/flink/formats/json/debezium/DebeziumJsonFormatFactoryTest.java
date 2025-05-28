@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Tests for {@link DebeziumJsonFormatFactory}. */
 class DebeziumJsonFormatFactoryTest {
+    public static final String targetTableName = "product";
 
     @Test
     void testSeDeSchema() {
@@ -77,6 +78,7 @@ class DebeziumJsonFormatFactoryTest {
 
         final DebeziumJsonSerializationSchema expectedSer =
                 new DebeziumJsonSerializationSchema(
+                        targetTableName,
                         (RowType) PHYSICAL_DATA_TYPE.getLogicalType(),
                         TimestampFormat.ISO_8601,
                         JsonFormatOptions.MapNullKeyMode.LITERAL,

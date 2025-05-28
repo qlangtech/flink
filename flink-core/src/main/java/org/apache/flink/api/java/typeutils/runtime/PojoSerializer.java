@@ -236,17 +236,20 @@ public final class PojoSerializer<T> extends TypeSerializer<T> {
 
         Class<?> actualType = from.getClass();
         if (isRecord()) {
+            Field field = null;
             try {
                 JavaRecordBuilderFactory<T>.JavaRecordBuilder builder = recordFactory.newBuilder();
                 for (int i = 0; i < numFields; i++) {
-                    if (fields[i] != null) {
+                    if ( (field = fields[i]) != null) {
                         builder.setField(i, copyField(i, from));
                     }
                 }
                 return builder.build();
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(
-                        "Error during POJO copy, this should not happen since we check the fields before.");
+                        "Error during POJO copy, this should not happen since we check the fields before.field:"
+                         + ((field != null) ? field.getName() : "none") + " numFields:"
+                         + numFields);
             }
         } else if (actualType == clazz) {
             T target;

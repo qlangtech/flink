@@ -28,6 +28,8 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.api.model.ServiceSpecFluent;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -36,17 +38,25 @@ import java.util.stream.Collectors;
 /** An abstract class represents the service type that flink supported. */
 public abstract class ServiceType {
 
+    public Service buildUpExternalRestService(
+            KubernetesJobManagerParameters kubernetesJobManagerParameters) {
+        final String serviceName =
+                ExternalServiceDecorator.getExternalServiceName(
+                        kubernetesJobManagerParameters.getClusterId());
+        return this.buildUpExternalRestService(serviceName, kubernetesJobManagerParameters);
+    }
+
     /**
      * Build up the external rest service template, according to the jobManager parameters.
      *
      * @param kubernetesJobManagerParameters the parameters of jobManager.
      * @return the external rest service
      */
-    public Service buildUpExternalRestService(
+    public Service buildUpExternalRestService(String serviceName,
             KubernetesJobManagerParameters kubernetesJobManagerParameters) {
-        final String serviceName =
-                ExternalServiceDecorator.getExternalServiceName(
-                        kubernetesJobManagerParameters.getClusterId());
+//        final String serviceName =
+//                ExternalServiceDecorator.getExternalServiceName(
+//                        kubernetesJobManagerParameters.getClusterId());
 
         return new ServiceBuilder()
                 .withApiVersion(Constants.API_VERSION)
@@ -56,11 +66,12 @@ public abstract class ServiceType {
                 .withAnnotations(kubernetesJobManagerParameters.getRestServiceAnnotations())
                 .endMetadata()
                 .withNewSpec()
-                .withType(
-                        kubernetesJobManagerParameters
-                                .getRestServiceExposedType()
-                                .serviceType()
-                                .getType())
+                .withType(this.getType()
+//                        kubernetesJobManagerParameters
+//                                .getRestServiceExposedType()
+//                                .serviceType()
+//                                .getType()
+                )
                 .withSelector(kubernetesJobManagerParameters.getSelectors())
                 .addNewPort()
                 .withName(Constants.REST_PORT_NAME)
