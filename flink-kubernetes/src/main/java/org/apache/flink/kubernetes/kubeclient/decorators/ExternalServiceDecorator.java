@@ -26,10 +26,8 @@ import io.fabric8.kubernetes.api.model.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
 
@@ -45,7 +43,7 @@ public class ExternalServiceDecorator extends AbstractKubernetesStepDecorator {
     /**
      * TIS 需要添加自有的Service以满足需求
      */
-    public static Function<KubernetesJobManagerParameters, Service> externalServiceSuppler;
+    public static ExternalServiceSuppler externalServiceSuppler;
 
     @Override
     public List<HasMetadata> buildAccompanyingKubernetesResources() throws IOException {
@@ -66,6 +64,19 @@ public class ExternalServiceDecorator extends AbstractKubernetesStepDecorator {
 
     }
 
+//    @Override
+//    public FlinkPod decorateFlinkPod(FlinkPod flinkPod) {
+//
+//        if(externalServiceSuppler != null){
+//            PodBuilder podBuilder = flinkPod.getPodWithoutMainContainer().edit();
+//            //  podBuilder.editOrNewSpec().addNewHostAlias().withIp(Constants.LOCALHOST_IP).withHostnames(Constants.LOCALHOST_NAME);
+//            externalServiceSuppler.decorateFlinkPod(podBuilder);
+//            return new FlinkPod.Builder(flinkPod).withPod(podBuilder.build()).build();
+//        }
+//
+//        return flinkPod;
+//    }
+
     /** Generate name of the external rest Service. */
     public static String getExternalServiceName(String clusterId) {
         return clusterId + Constants.FLINK_REST_SERVICE_SUFFIX;
@@ -78,4 +89,5 @@ public class ExternalServiceDecorator extends AbstractKubernetesStepDecorator {
     public static String getNamespacedExternalServiceName(String clusterId, String namespace) {
         return getExternalServiceName(clusterId) + "." + namespace;
     }
+
 }

@@ -24,6 +24,7 @@ import org.apache.flink.kubernetes.kubeclient.decorators.CmdTaskManagerDecorator
 import org.apache.flink.kubernetes.kubeclient.decorators.EnvSecretsDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.FlinkConfMountDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.HadoopConfMountDecorator;
+import org.apache.flink.kubernetes.kubeclient.decorators.HostAliasDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.InitTaskManagerDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.KerberosMountDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.KubernetesStepDecorator;
@@ -34,17 +35,20 @@ import org.apache.flink.util.Preconditions;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.KUBERNETES_HADOOP_CONF_MOUNT_DECORATOR_ENABLED;
 import static org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.KUBERNETES_KERBEROS_MOUNT_DECORATOR_ENABLED;
 
 /** Utility class for constructing the TaskManager Pod on the JobManager. */
 public class KubernetesTaskManagerFactory {
-
+    private static final Logger logger = LoggerFactory.getLogger(KubernetesTaskManagerFactory.class);
     public static KubernetesPod buildTaskManagerKubernetesPod(
             FlinkPod podTemplate, KubernetesTaskManagerParameters kubernetesTaskManagerParameters) {
         FlinkPod flinkPod = Preconditions.checkNotNull(podTemplate).copy();
@@ -55,7 +59,9 @@ public class KubernetesTaskManagerFactory {
                                 new InitTaskManagerDecorator(kubernetesTaskManagerParameters),
                                 new EnvSecretsDecorator(kubernetesTaskManagerParameters),
                                 new MountSecretsDecorator(kubernetesTaskManagerParameters),
-                                new CmdTaskManagerDecorator(kubernetesTaskManagerParameters)));
+                                new CmdTaskManagerDecorator(kubernetesTaskManagerParameters),
+                                // baisui add 2025/08/13
+                                new HostAliasDecorator(kubernetesTaskManagerParameters)));
 
         Configuration configuration = kubernetesTaskManagerParameters.getFlinkConfiguration();
         if (configuration.get(KUBERNETES_HADOOP_CONF_MOUNT_DECORATOR_ENABLED)) {
@@ -66,7 +72,9 @@ public class KubernetesTaskManagerFactory {
         }
 
         stepDecorators.add(new FlinkConfMountDecorator(kubernetesTaskManagerParameters));
-
+        logger.info("Adding step decorators: {}"
+                , String.join(",",stepDecorators.stream().map((dec)->dec.getClass().getSimpleName()).collect(
+                Collectors.toList())) );
         for (KubernetesStepDecorator stepDecorator : stepDecorators) {
             flinkPod = stepDecorator.decorateFlinkPod(flinkPod);
         }

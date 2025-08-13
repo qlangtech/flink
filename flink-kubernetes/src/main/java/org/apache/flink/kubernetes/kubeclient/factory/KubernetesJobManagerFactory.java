@@ -26,6 +26,7 @@ import org.apache.flink.kubernetes.kubeclient.decorators.EnvSecretsDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.ExternalServiceDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.FlinkConfMountDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.HadoopConfMountDecorator;
+import org.apache.flink.kubernetes.kubeclient.decorators.HostAliasDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.InitJobManagerDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.InternalServiceDecorator;
 import org.apache.flink.kubernetes.kubeclient.decorators.KerberosMountDecorator;
@@ -74,7 +75,9 @@ public class KubernetesJobManagerFactory {
                                 new MountSecretsDecorator(kubernetesJobManagerParameters),
                                 new CmdJobManagerDecorator(kubernetesJobManagerParameters),
                                 new InternalServiceDecorator(kubernetesJobManagerParameters),
-                                new ExternalServiceDecorator(kubernetesJobManagerParameters)));
+                                new ExternalServiceDecorator(kubernetesJobManagerParameters),
+                                // baisui add 2025/08/13
+                                new HostAliasDecorator(kubernetesJobManagerParameters)));
 
         Configuration configuration = kubernetesJobManagerParameters.getFlinkConfiguration();
         if (configuration.get(KUBERNETES_HADOOP_CONF_MOUNT_DECORATOR_ENABLED)) {
